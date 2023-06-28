@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "DepthFlow"
+version = "2023.6.27"
+description = "Image to 2.5D Parallax Effect Video"
+authors = ["Tremeschin"]
+license = "AGPLv3-only"
+
+[[tool.poetry.packages]]
+include = "DepthFlow"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+broken = {path="/Broken", develop=true}
+moderngl = "^5.8.2"
+transformers = "^4.30.2"
+pillow = "^9.5.0"
+numpy = "^1.25.0"
+torch = "^2.0.1"
+torchvision = "^0.15.2"
+imageio-ffmpeg = "^0.4.8"
+
+[tool.poetry.scripts]
+depthflow = "DepthFlow.__init__:main"

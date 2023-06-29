@@ -88,7 +88,7 @@ class ImageDepthUtils:
 
         # Normalize the depth map
         depth_map = (depth_map - depth_map.min()) / normalize
-        return Image.fromarray((depth_map * 255).astype("uint8"))
+        return PIL.Image.fromarray((depth_map * 255).astype("uint8"))
 
 # -------------------------------------------------------------------------------------------------|
 

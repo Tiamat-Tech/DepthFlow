@@ -10,7 +10,7 @@ include = "DepthFlow"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-broken = {path="/Broken", develop=true}
+broken = {path="../../", develop=true}
 moderngl = "^5.8.2"
 transformers = "^4.30.2"
 pillow = "^9.5.0"

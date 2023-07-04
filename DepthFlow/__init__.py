@@ -1,9 +1,10 @@
+import torch
+
 from Broken import *
 
 # -------------------------------------------------------------------------------------------------|
 # Torch - The bane of my existence
 
-import torch
 warnings.filterwarnings("ignore", message="Can't initialize NVML")
 
 # Prefer CUDA if available, override with TORCH_DEVICE env variable

@@ -1,5 +1,6 @@
 from DepthFlow import *
 
+
 def main():
     # Initialize DepthFlow
     depthflow = DepthFlow()
@@ -13,7 +14,7 @@ def main():
 
     # Render to video
     depthflow.render_video(
-        next=PresetDefault(loop_time=4).next,
+        next=PresetDefault(loop_time=5).next,
         output="Parallax.mp4",
         duration=10,
         fps=60

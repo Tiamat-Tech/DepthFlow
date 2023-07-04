@@ -71,7 +71,7 @@ class DepthFlowMDE:
         warning("Estimating Depth Map for input image (Might take a while, heavy on CPU or GPU)")
         # with halo.Halo():
         if "Zoe" in self.mde.name:
-            depth_map = PIL.Image.fromarray(self.mde.model.infer_pil(image).astype("uint8"), "L")
+            depth_map = self.mde.model.infer_pil(image)
         else:
             error(f"Unknown Monocular Depth Estimation Model [{self.mde}]")
             exit(1)
@@ -88,8 +88,10 @@ class DepthFlowMDE:
             if (normalize := depth_map.max() - depth_map.min()) == 0:
                 warning("Depth map (min(D) = max(D)), something went wrong on the depth estimation? Using as it is")
             else:
-                depth_map = (depth_map - depth_map.min()) / normalize
-                depth_map = PIL.Image.fromarray((depth_map * 255).astype("uint8"))
+                depth_map = 255 * (depth_map - depth_map.min()) / normalize
+
+        # Convert array to PIL Image RGB24
+        depth_map = PIL.Image.fromarray(depth_map.astype("uint8"), "L")
 
         # Save image to Cache
         if cache:

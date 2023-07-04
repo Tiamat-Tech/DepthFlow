@@ -7,20 +7,19 @@ out vec4 color;
 // ------------------------------------------------------------------------------------------------|
 //// Textures
 
-// Input textures - base image and its depth map
-uniform sampler2D base_image;
-uniform sampler2D depth_map;
-
-// Base_image's resolution
-uniform vec2 resolution;
+// Input textures
+uniform sampler2D image_A;
+uniform sampler2D depth_A;
+uniform sampler2D image_B;
+uniform sampler2D depth_B;
 
 // ------------------------------------------------------------------------------------------------|
 //// Effect parameters
 
 // Camera parameters
 uniform vec2  camera_position;
-uniform float camera_distance;
 uniform float camera_rotation;
+uniform float camera_focus;
 uniform float camera_zoom;
 
 // Parallax intensity for a normalized camera_position
@@ -29,6 +28,9 @@ uniform float parallax_intensity;
 // Vignette parameters
 uniform float vignette_radius;
 uniform float vignette_intensity;
+
+// Blend image A and B factor
+uniform float blend;
 
 // Random parameters
 uniform float time;
@@ -56,20 +58,17 @@ vec2 center_zoom_stuv(vec2 stuv, float zoom) {
 
 // ------------------------------------------------------------------------------------------------|
 
-// Zero depth means the object does not move
-float get_depth(vec2 stuv) {
-    // Don't overshoot image borders
+// Get the clamped depth of a image (no overshooting) based on camera_focus
+// - Zero depth means the object does not move
+float get_depth(vec2 stuv, sampler2D depth) {
     stuv = clamp(stuv, 0.0, 1.0);
-
-    // Return inversion of heightmap relative to camera_distance
-    // FIXME: Directions should be inverted when this changes signal relative to camera_distance
-    return camera_distance - texture(depth_map, stuv).r;
+    return camera_focus - texture(depth, stuv).r;
 }
 
 // Depth-Layer displacement for a pixel, composed of the camera displacement times max
 // camera displacement (parallax_intensity) times the depth of the pixel (zero should not move)
-vec2 displacement(vec2 stuv) {
-    return camera_position * get_depth(stuv) * parallax_intensity;
+vec2 displacement(vec2 stuv, sampler2D depth) {
+    return camera_position * get_depth(stuv, depth) * parallax_intensity;
 }
 
 // Apply border vignettes, all values normalized.
@@ -89,24 +88,28 @@ vec3 vignette(vec2 stuv, vec3 pixel) {
     return mix(pixel, vec3(0.0), vignette_value);
 }
 
-// --------------------------------------------------------------------------------------------|
+// ------------------------------------------------------------------------------------------------|
 
 // Apply the DepthFlow parallax effect into some image and its depth map
-vec4 image_parallax(vec2 stuv, sampler2D image, sampler2D depth) {
-    // The idea of how this shader works is that we search, on the opposite direction a pixel is
-    // supposed to "walk", if some other pixel should be in front of *us* or not.
+//
+// - The idea of how this shader works is that we search, on the opposite direction a pixel is
+//   supposed to "walk", if some other pixel should be in front of *us* or not.
+//
+// - B's texture is A's on the future, so the parallax direction must be the inverse (send -1)
+//
+vec4 image_parallax(vec2 stuv, sampler2D image, sampler2D depth, int parallax_direction) {
 
     // The direction the pixel walk is the camera displacement itself
-    vec2 direction = camera_position*parallax_intensity;
+    vec2 direction = camera_position * parallax_intensity;
 
     // Initialize the parallax space with the original stuv
-    vec2 parallax_uv = stuv + displacement(stuv);
+    vec2 parallax_uv = stuv + displacement(stuv, depth);
 
     // FIXME: Do you know how to code shaders better than me?
     // Fixme: Could you implement the step() pixel size anti-aliasing and better efficiency?
     for (float i=0; i<length(direction); i=i+0.001) {
-        vec2 walk_stuv          = stuv + direction*i;
-        vec2 other_displacement = displacement(walk_stuv);
+        vec2 walk_stuv          = stuv + direction*i * parallax_direction;
+        vec2 other_displacement = displacement(walk_stuv, depth);
 
         if (i < length(other_displacement)) {
             parallax_uv = walk_stuv;
@@ -130,12 +133,14 @@ void main() {
     stuv = center_zoom_stuv(stuv, camera_zoom - parallax_intensity/2);
 
     // Center-Rotate the stuv coordinates considering the aspect ratio
-    // FIXME: I don't remember and am lazy to think in anti shear matrix vectors
-    // float aspect_ratio = resolution.x/resolution.y;
-    stuv = rotate2d(camera_rotation, resolution) * (stuv - 0.5) + 0.5;
+    stuv = rotate2d(camera_rotation, textureSize(image_A, 0)) * (stuv - 0.5) + 0.5;
 
     // Return parallax effect of the base image
-    color.rgb = image_parallax(stuv, base_image, depth_map).rgb;
+    vec4 parallax_A = image_parallax(stuv, image_A, depth_A,  1);
+    vec4 parallax_B = image_parallax(stuv, image_B, depth_B, -1);
+
+    // Mix TextureA and TextureB
+    color.rgb = mix(parallax_A, parallax_B, blend).rgb;
 
     // Apply vignette
     // color.rgb = vignette(stuv, color.rgb);

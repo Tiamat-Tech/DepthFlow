@@ -1,5 +1,6 @@
 from DepthFlow import *
 
+# -------------------------------------------------------------------------------------------------|
 
 class DepthEstimationModel(Enum):
     ZoeN  = DotMap(name="ZoeDepthN",  type="transformers", repository=("isl-org/ZoeDepth", "ZoeD_N") )
@@ -9,7 +10,6 @@ class DepthEstimationModel(Enum):
     # Stable diffusion ones
     StableDiffusion   = DotMap()
     StableDiffusionXL = DotMap()
-
 
 class DepthFlowMDE:
     """DepthFlow Monocular Depth Estimation"""
@@ -74,10 +74,6 @@ class DepthFlowMDE:
             depth_map = self.mde.model.infer_pil(image)
         else:
             error(f"Unknown Monocular Depth Estimation Model [{self.mde}]")
-            exit(1)
-
-            # FIXME Implement the other non zoe models
-            # depth_map = self.monocular_depth_estimation.model(image)["depth"]
 
         # Normalize the depth map to (0, 1) based on the min and max values
         if normalized:
@@ -102,9 +98,14 @@ class DepthFlowMDE:
 
 # -------------------------------------------------------------------------------------------------|
 
+class DepthFlowTextureIndex(Enum):
+    A = (0, 1)
+    B = (2, 3)
+
 class DepthFlow:
     def __init__(self):
         self.mde = DepthFlowMDE()
+        self.textures = DotMap()
 
     # # OpenGL / Shaders
 
@@ -117,10 +118,6 @@ class DepthFlow:
             vertex_shader=(SHADERS_DIRECTORY/"DepthFlow.vert").read_text(),
             fragment_shader=(SHADERS_DIRECTORY/"DepthFlow.frag").read_text(),
         )
-
-        # We'll only have two textures so hardcode their position
-        self.send_uniform("base_image", 0)
-        self.send_uniform("depth_map", 1)
 
         # Define vertices: pairs of [vec2 render_vertex] and [vec2 coords_vertex]
         #
@@ -139,11 +136,10 @@ class DepthFlow:
             dtype="f4",
         )
 
-        # Upload vertices to the Vertex Buffer Object
+        # Create VBO and VAO objects
         self.vbo = self.opengl_context.buffer(vertices)
-
-        # Create Vertex Array Object
         self.vao = self.opengl_context.simple_vertex_array(self.program, self.vbo, "render_vertex", "coords_vertex")
+        self.fbo = None
 
         # Super Sampling Anti Aliasing
         self.ssaa = (1440/1080)
@@ -151,58 +147,81 @@ class DepthFlow:
     # # Properties
 
     @property
-    def resolution(self) -> numpy.ndarray:
-        return numpy.array(self.base_image.size).astype(int)
+    def video_resolution(self) -> numpy.ndarray:
+        return numpy.array(self.textures[0].size)
 
     @property
-    def resolution_ssaa(self) -> numpy.ndarray:
-        return (self.resolution * self.ssaa).astype(int)
+    def render_resolution(self) -> numpy.ndarray:
+        return (self.video_resolution * self.ssaa).astype(int)
 
-    # # Inputs
+    # # Uniforms
 
-    def send_uniform(self, name, value):
+    def set_uniform(self, name, value) -> None:
         """Send a uniform to the shader fail-safe if it isn't used"""
         if name in self.program:
             self.program[name].value = value
 
-    def input(self, image: Union[PilImage, PathLike, URL], depth_map: Union[PilImage, PathLike, URL]=None) -> Result:
-        """Load an base image, calculate its depth map and upload both to the GPU"""
+    def get_uniform(self, name) -> Option[Any, None]:
+        """Get a uniform from the shader fail-safe if it isn't used"""
+        return self.program[name].get(value, None)
+
+    # # Textures
+
+    def _upload_texture(self, name: str, texture: PilImage, index: int, channels: int=3) -> None:
+        """Internal: Upload a texture to the GPU and send it to the shader at a variable name"""
+        info(f"• Uploading Texture to OpenGL")
+        info(f"└─ Info: [{name} ({texture.size[0]}x{texture.size[1]}x{channels}) @ Index {index}]")
+
+        # Do the ModernGL magic
+        texture = self.opengl_context.texture(texture.size, channels, texture.tobytes())
+        texture.filter = (moderngl.LINEAR_MIPMAP_NEAREST, moderngl.LINEAR_MIPMAP_NEAREST)
+        texture.build_mipmaps()
+        texture.anisotropy = 16
+        texture.use(index)
+        self.set_uniform(name, index)
+        self.textures[index] = texture
+
+    def upload_texture(self,
+        index: DepthFlowTextureIndex,
+        image: Union[PilImage, PathLike, URL],
+        depth: Union[PilImage, PathLike, URL]=None
+    ) -> None:
 
         # Load image and its depth map
-        self.base_image = BrokenSmart.load_image(image)
-        if self.base_image is None: return Error
-        self.depth_map = self.mde.depth_map(image) if (depth_map is None) else depth_map
-        self.send_uniform("resolution", self.resolution)
-
-        def upload_texture(texture, channels, index):
-            texture = self.opengl_context.texture(texture.size, channels, texture.tobytes())
-            texture.filter = (moderngl.LINEAR_MIPMAP_NEAREST, moderngl.LINEAR_MIPMAP_NEAREST)
-            texture.build_mipmaps()
-            texture.anisotropy = 16
-            texture.use(index)
+        image = BrokenSmart.load_image(image).convert("RGB")
+        depth = depth or self.mde.depth_map(image)
 
         # Upload textures to the GPU
-        info("Uploading textures to OpenGL - GPU")
-        upload_texture(self.base_image, channels=3, index=0)
-        upload_texture(self.depth_map,  channels=1, index=1)
+        self._upload_texture(f"image_{index.name}", image, index=index.value[0], channels=3)
+        self._upload_texture(f"depth_{index.name}", depth, index=index.value[1], channels=1)
+        self._create_update_fbo()
 
-        # Create Frame Buffer Object
-        info(f"Creating Frame Buffer Object with resolution {self.resolution}")
-        self.fbo = self.opengl_context.simple_framebuffer(self.resolution_ssaa)
+    def _create_update_fbo(self) -> None:
+        """Create and/or update FBO as needed for current input image resolution"""
+        if self.fbo is None:
+            pass
+        elif (self.fbo.size != self.render_resolution).any():
+            self.fbo.release()
+        else:
+            return
+        info(f"• Creating new main Frame Buffer Object")
+        info(f"└─  Resolution: [{self.render_resolution[0]}x{self.render_resolution[1]}]")
+        self.fbo = self.opengl_context.simple_framebuffer(self.render_resolution)
         self.fbo.use()
-
-        return Ok
 
     # # Render function
 
     def render_image(self) -> bytes:
         """Clear context, render, return raw RGB SSAA resolution image"""
+        # self._create_update_fbo()
         self.opengl_context.clear(0)
         self.vao.render(moderngl.TRIANGLE_STRIP)
         return self.fbo.read()
 
+# -------------------------------------------------------------------------------------------------|
+
     def render_video(self,
-        # Something that accepts .(DepthFlow.self, time)
+        # Something that accepts next.(DepthFlow.self, time, duration)
         next: callable,
 
         # Video parameters
@@ -220,12 +239,12 @@ class DepthFlow:
             "-hide_banner",
             "-f", "rawvideo",
             "-pix_fmt", "rgb24",
-            "-s", f"{self.resolution_ssaa[0]}x{self.resolution_ssaa[1]}",
+            "-s", f"{self.render_resolution[0]}x{self.render_resolution[1]}",
             "-r", str(fps),
             "-i", "-",
 
             # Resize to the nearest 2-multiple of self.resolution and anti aliasing filter
-            "-vf", f"scale={self.resolution[0]//2*2}:{self.resolution[1]//2*2}:flags=lanczos",
+            "-vf", f"scale={self.video_resolution[0]//2*2}:{self.video_resolution[1]//2*2}:flags=lanczos",
 
             "-profile:v", "high",
             "-preset", "slow",
@@ -248,7 +267,7 @@ class DepthFlow:
             for time in numpy.linspace(0, duration, total_frames):
 
                 # Apply dynamics to the shader
-                self.send_uniform("time", time)
+                self.set_uniform("time", time)
                 next(self, time, duration)
 
                 # Render send image to FFmpeg

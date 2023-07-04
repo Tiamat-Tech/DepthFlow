@@ -43,12 +43,12 @@ Some possibilities include:
 - **Depth Estimation** is a hard problem, the output should be accurate enough
 - **The Shader** can't do magic, let's make it better
 
-<sub>Eventually I'd like the Shaders pipeline and imagery to be part of ShaderFlow project. The one here might not be the most flexisble</sub>
+<sub>Eventually I'd like the Shaders pipeline and imagery to be part of ShaderFlow project. The one here might not be the most flexible</sub>
 
 <br/>
 
 **Future:**
-- **Keyframes:** Given many _keyframes_, interpolate prompts, depth maps, effects intensity
+- **Keyframes:** Given a list of _keyframes_, interpolate prompts, depth maps, effects intensity
 - Maybe some form of API and **User Interface** to make it easier to use
 - **Music:** Generative music that maybe follows the video
 

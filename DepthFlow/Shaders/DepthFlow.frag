@@ -124,5 +124,5 @@ void main() {
     color = texture(base_image, parallax_uv);
 
     // Apply vignette
-    color.rgb = vignette(stuv, color.rgb);
+    // color.rgb = vignette(stuv, color.rgb);
 }

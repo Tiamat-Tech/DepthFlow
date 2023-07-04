@@ -4,8 +4,6 @@ from DepthFlow import *
 def main():
     # Initialize DepthFlow
     depthflow = DepthFlow()
-
-    # Start OpenGL
     depthflow.init_opengl()
 
     # Input Path or URL

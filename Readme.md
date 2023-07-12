@@ -7,7 +7,7 @@
 
   Eventual **Text to Video** powered by Stable Diffusion
 
-  <img src="https://api.star-history.com/svg?repos=BrokenSource/DepthFlow&type=Timeline"/>
+  <img src="https://api.star-history.com/svg?repos=BrokenSource/DepthFlow&type=Timeline" width=500/>
 </div>
 
 <br/>

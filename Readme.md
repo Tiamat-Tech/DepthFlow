@@ -6,9 +6,9 @@
   Image → **2.5D Parallax** Effect Video
 
   Eventual **Text to Video** powered by Stable Diffusion
+
+  <img src="https://api.star-history.com/svg?repos=BrokenSource/DepthFlow&type=Timeline"/>
 </div>
-
-
 
 <br/>
 <br/>
@@ -40,6 +40,8 @@ Some possibilities include:
 
 **Challenges:**
 - **GPU Computation time** will be a bottleneck for longer videos or many feedback loops per second
+  - _Possible solution_: Use fewer steps on img2img since it is already close to the target
+  - _Implementation_: Stop when `MSE(A, B)` is low enough
 - **Depth Estimation** is a hard problem, the output should be accurate enough
 - **The Shader** can't do magic, let's make it better
 
@@ -59,11 +61,25 @@ Some possibilities include:
 
 # Installation
 
+### Package Manageer
+We are actively looking for package managers to bundle our projects, if you are interested in helping please contact us, you'll be credited here and do a great convenience service to the whole community
+
+<br/>
+
 ### Prebuilt Binaries
-~~Grab the latest release for your platform [Here](https://github.com/BrokenSource/DepthFlow/releases/latest)~~ Prebuilt binaries are WIP
+We only release prebuilt binaries with PyTorch CUDA backend exclusive to NVIDIA GPUs, don't worry, if you are on macOS or have an AMD GPU please run directly from the source code, it works just as well
+
+**Instructions**:
+
+- Install [CUDA](https://developer.nvidia.com/cuda-downloads) and [cuDNN](https://developer.nvidia.com/cudnn) (Preferably from package manager in Linux)
+
+- Grab the latest [DepthFlow Release](https://github.com/BrokenSource/DepthFlow/releases/latest) for your platform, run it
+
+
+<br/>
 
 ### Running from the Source Code
-Follow instructions on our [Monorepo](https://github.com/BrokenSource/BrokenSource)
+Follow instructions on our [Monorepo](https://github.com/BrokenSource/BrokenSource) for downloading our Framework, and chose PyTorch acceleration method below:
 
 
 
@@ -81,6 +97,8 @@ Beware dragons:
 - `CPU`: Most compatible option, but slow for bigger inferences
 
 You can reinstall the Python virtual environment with `broken depthflow --reinstall` to apply the changes
+
+
 
 
 <br/>

@@ -2,9 +2,10 @@ from DepthFlow import *
 
 
 def main():
+
     # Initialize DepthFlow
-    depthflow = DepthFlow()
-    depthflow.init_opengl()
+    depthflow = DepthFlowGL()
+    depthflow.init()
 
     # Input Path or URL
     depthflow.upload_texture(
@@ -16,11 +17,13 @@ def main():
         image="https://w.wallhaven.cc/full/85/wallhaven-85dv52.png"
     )
 
-    # Render to video
-    depthflow.render_video(
-        next=PresetDefault(loop_time=5).next,
-        output="Parallax.mp4",
-        duration=10,
-        fps=60
-    )
+    # # Render to video
+    # depthflow.render_video(
+    #     next=PresetDefault(loop_time=5).next,
+    #     output="Parallax.mp4",
+    #     duration=10,
+    #     fps=60
+    # )
 
+if __name__ == "__main__":
+    main()

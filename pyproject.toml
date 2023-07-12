@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "DepthFlow"
-version = "2023.7.4"
+version = "2023.7.11"
 description = "Image to 2.5D Parallax Effect Video"
 authors = ["Tremeschin"]
 license = "AGPLv3-only"
@@ -16,9 +16,16 @@ transformers = "^4.30.2"
 numpy = "^1.25.0"
 imageio-ffmpeg = "^0.4.8"
 webuiapi = "^0.9.3"
-torch = [{version="2.0.1", source="torch"}]
-torchvision = "0.15.2"
 timm = "0.6.7"
+intervaltree = "^3.1.0"
+
+# Don't have NVIDIA GPU or want to run nightly/cpu only?
+# - Add source="torch" to the next line and uncomment some url on [tool.poetry.source] below
+torch = {version="^2.0.1", source="torch"}
+torchvision = {version="0.15.2", source="torch"}
+
+# FIXME: Temporary for keyframes validation, remove after
+plotly = "^5.15.0"
 
 [tool.poetry.scripts]
 depthflow = "DepthFlow.__main__:main"
@@ -34,12 +41,13 @@ priority = "explicit"
 # url = "https://download.pytorch.org/whl"
 
 # CPU Only
-url = "https://download.pytorch.org/whl/cpu"
+# url = "https://download.pytorch.org/whl/cpu"
 
 # AMD GPU - ROCm
 # url = "https://download.pytorch.org/whl/rocm5.4.2"
 # url = "https://download.pytorch.org/whl/nightly/rocm5.5"
 
 # NVIDIA GPU - CUDA
+url = "https://download.pytorch.org/whl/cu118"
 # url = "https://download.pytorch.org/whl/nightly/cu118"
 # url = "https://download.pytorch.org/whl/nightly/cu121"

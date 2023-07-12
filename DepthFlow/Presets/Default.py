@@ -26,11 +26,11 @@ class PresetDefault:
         depthflow.set_uniform("camera_zoom", zoom)
 
         # Parallax intensity
-        depthflow.set_uniform("parallax_intensity", 0.15)
+        depthflow.set_uniform("parallax_factor", 0.15)
 
         # Vignette
         depthflow.set_uniform("vignette_radius", 0.3)
-        depthflow.set_uniform("vignette_intensity", 0.3)
+        depthflow.set_uniform("vignette_smooth", 0.3)
 
         # Image blending
         x = time/duration

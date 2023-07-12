@@ -23,11 +23,11 @@ uniform float camera_focus;
 uniform float camera_zoom;
 
 // Parallax intensity for a normalized camera_position
-uniform float parallax_intensity;
+uniform float parallax_factor;
 
 // Vignette parameters
 uniform float vignette_radius;
-uniform float vignette_intensity;
+uniform float vignette_smooth;
 
 // Blend image A and B factor
 uniform float blend;
@@ -66,23 +66,23 @@ float get_depth(vec2 stuv, sampler2D depth) {
 }
 
 // Depth-Layer displacement for a pixel, composed of the camera displacement times max
-// camera displacement (parallax_intensity) times the depth of the pixel (zero should not move)
+// camera displacement (parallax_factor) times the depth of the pixel (zero should not move)
 vec2 displacement(vec2 stuv, sampler2D depth) {
-    return camera_position * get_depth(stuv, depth) * parallax_intensity;
+    return camera_position * get_depth(stuv, depth) * parallax_factor;
 }
 
 // Apply border vignettes, all values normalized.
 // - vignette_radius is the distance from the border to the center
-// - vignette_intensity is the starting value of the transparency of the vignette on the borders
+// - vignette_smooth is the starting value of the transparency of the vignette on the borders
 // - Vignette reaches zero on vignette_radius/2
-// FIXME: I was sleepy, have weird effects on vignette_intensity=1
+// FIXME: I was sleepy, have weird effects on vignette_smooth=1
 vec3 vignette(vec2 stuv, vec3 pixel) {
 
     // Get the minimum distance to any border
     float distance_to_border = min(min(stuv.x, 1.0 - stuv.x), min(stuv.y, 1.0 - stuv.y));
 
     // Get the vignette value
-    float vignette_value = smoothstep(vignette_radius, vignette_radius - vignette_intensity, distance_to_border);
+    float vignette_value = smoothstep(vignette_radius, vignette_radius - vignette_smooth, distance_to_border);
 
     // Apply the vignette alpha composition
     return mix(pixel, vec3(0.0), vignette_value);
@@ -100,7 +100,7 @@ vec3 vignette(vec2 stuv, vec3 pixel) {
 vec4 image_parallax(vec2 stuv, sampler2D image, sampler2D depth, int parallax_direction) {
 
     // The direction the pixel walk is the camera displacement itself
-    vec2 direction = camera_position * parallax_intensity;
+    vec2 direction = camera_position * parallax_factor;
 
     // Initialize the parallax space with the original stuv
     vec2 parallax_uv = stuv + displacement(stuv, depth);
@@ -130,7 +130,7 @@ void main() {
     stuv.y = 1.0 - stuv.y;
 
     // Zoom in on the stuv coordinate since the max displacement on X or Y is $intensity
-    stuv = center_zoom_stuv(stuv, camera_zoom - parallax_intensity/2);
+    stuv = center_zoom_stuv(stuv, camera_zoom);
 
     // Center-Rotate the stuv coordinates considering the aspect ratio
     stuv = rotate2d(camera_rotation, textureSize(image_A, 0)) * (stuv - 0.5) + 0.5;

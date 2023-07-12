@@ -102,14 +102,33 @@ class DepthFlowTextureIndex(Enum):
     A = (0, 1)
     B = (2, 3)
 
-class DepthFlow:
+# Default shader pipelines
+DEPTHFLOW_DEFAULT_SHADER_VARIABLES = DotMap(
+    # Camera
+    camera_position = (0.0, 0.0),
+    camera_rotation = 0.0,
+    camera_focus    = 1.0,
+    camera_zoom     = 1.0,
+
+    # Parallax
+    parallax_factor = 0.0,
+
+    # Vignette
+    vignette_radius = 0.0,
+    vignette_smooth = 0.0,
+
+    # Textures
+    blend           = 0.0,
+)
+
+class DepthFlowGL:
     def __init__(self):
         self.mde = DepthFlowMDE()
         self.textures = DotMap()
 
     # # OpenGL / Shaders
 
-    def init_opengl(self):
+    def init(self):
         # Create OpenGL Context
         self.opengl_context = moderngl.create_standalone_context()
 
@@ -211,72 +230,15 @@ class DepthFlow:
 
     # # Render function
 
-    def render_image(self) -> bytes:
-        """Clear context, render, return raw RGB SSAA resolution image"""
-        # self._create_update_fbo()
+    def render(self, variables: DotMap={}, read=True) -> bytes:
+        """Clear context, render, return raw RGB SSAA resolution image if read=True"""
+        self._create_update_fbo()
+
+        # Send variables to the shader
+        for name, value in variables.items():
+            self.set_uniform(name, value)
+
+        # Clear screen, render, read pixels
         self.opengl_context.clear(0)
         self.vao.render(moderngl.TRIANGLE_STRIP)
-        return self.fbo.read()
-
-# -------------------------------------------------------------------------------------------------|
-
-    def render_video(self,
-        # Something that accepts next.(DepthFlow.self, time, duration)
-        next: callable,
-
-        # Video parameters
-        output="Parallax.mp4",
-        duration=10,
-        fps=60
-    ):
-        output = true_path(output)
-        info(f"Rendering video to path [{output}]")
-
-        # Spawn FFmpeg
-        self.ffmpeg = shell(
-            BROKEN_FFMPEG_BINARY,
-            "-loglevel", "error",
-            "-hide_banner",
-            "-f", "rawvideo",
-            "-pix_fmt", "rgb24",
-            "-s", f"{self.render_resolution[0]}x{self.render_resolution[1]}",
-            "-r", str(fps),
-            "-i", "-",
-
-            # Resize to the nearest 2-multiple of self.resolution and anti aliasing filter
-            "-vf", f"scale={self.video_resolution[0]//2*2}:{self.video_resolution[1]//2*2}:flags=lanczos",
-
-            "-profile:v", "high",
-            "-preset", "slow",
-            "-tune", "film",
-            "-vcodec", "libx264",
-            "-crf", "25",
-            "-pix_fmt", "yuv420p",
-            output,
-            "-y",
-
-            # Broken shell options
-            Popen=True,
-            stdin=PIPE
-        )
-
-        total_frames = duration * fps
-
-        # Progress bar iterating over total frames
-        with tqdm(total=total_frames, unit="frame") as progress:
-            for time in numpy.linspace(0, duration, total_frames):
-
-                # Apply dynamics to the shader
-                self.set_uniform("time", time)
-                next(self, time, duration)
-
-                # Render send image to FFmpeg
-                image = self.render_image()
-                self.ffmpeg.stdin.write(image)
-                progress.update(1)
-
-        self.ffmpeg.stdin.close()
-        self.ffmpeg.wait()
-
-        success(f"Video rendered to [{output}]")
-        return output
+        return self.fbo.read() if read else None

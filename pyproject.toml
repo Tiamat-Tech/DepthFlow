@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "DepthFlow"
-version = "2023.7.11"
+version = "2023.7.14"
 description = "Image to 2.5D Parallax Effect Video"
 authors = ["Tremeschin"]
 license = "AGPLv3-only"
@@ -12,7 +12,6 @@ include = "DepthFlow"
 python = ">=3.10,<3.13"
 broken = {path="../../", develop=true}
 moderngl = "^5.8.2"
-transformers = "^4.30.2"
 numpy = "^1.25.0"
 imageio-ffmpeg = "^0.4.8"
 webuiapi = "^0.9.3"
@@ -26,6 +25,8 @@ torchvision = {version="0.15.2", source="torch"}
 
 # FIXME: Temporary for keyframes validation, remove after
 plotly = "^5.15.0"
+transformers = {git = "https://github.com/huggingface/transformers.git"}
+gradio = "^3.36.1"
 
 [tool.poetry.scripts]
 depthflow = "DepthFlow.__main__:main"

@@ -22,9 +22,12 @@ info(f"└─ Torch Version:  [{torch.__version__}]")
 DEPTHFLOW_DIRECTORIES = BrokenDirectories(app_name="DepthFlow", app_author="BrokenSource")
 SHADERS_DIRECTORY     = DEPTHFLOW_DIRECTORIES.EXECUTABLE/"Shaders"
 
-# isort: skip
+# isort: off
 from DepthFlow.DepthFlow import *
 from DepthFlow.Presets import *
 from DepthFlow.Shaders import *
 from DepthFlow.Timeline import *
-from DepthFlow.Mock import *
+
+# Mock
+from .DepthAudio import *
+

@@ -1,7 +1,7 @@
 from DepthFlow import *
 
 
-def main():
+def gl():
 
     # Initialize DepthFlow
     depthflow = DepthFlowGL()
@@ -17,13 +17,25 @@ def main():
         image="https://w.wallhaven.cc/full/85/wallhaven-85dv52.png"
     )
 
-    # # Render to video
-    # depthflow.render_video(
-    #     next=PresetDefault(loop_time=5).next,
-    #     output="Parallax.mp4",
-    #     duration=10,
-    #     fps=60
-    # )
+def music(
+    prompt: str,
+    device="auto",
+    model: AudioCraftModel=AudioCraftModel.Small,
+    ):
+    ...
+
+
+def main():
+    # typer = BrokenBase.typer_app()
+    # typer.command()(gl)
+    # typer.command()(music)
+    # typer()
+
+    def greet(name):
+        return "Hello " + name + "!"
+    demo = gradio.Interface(fn=greet, inputs="text", outputs="text")
+    demo.launch()
+
 
 if __name__ == "__main__":
     main()

@@ -1,8 +1,8 @@
-from . import *
-
 import torch
 from transformers import AutoProcessor
 from transformers import MusicgenForConditionalGeneration
+
+from . import *
 
 
 class AudioCraftModel(Enum):
@@ -180,14 +180,3 @@ class DepthMusic:
             with self.write_audio(f"chunk-{i}.opus") as write:
                 write(mix.T.astype(numpy.float32).tobytes())
                 # write(latest.astype(numpy.float32).tobytes())
-
-# Run DepthMusic
-# dm = DepthMusic(AudioCraftModel.Small)
-# dm.main(
-#     # prompt="An 80s driving pop song with heavy drums and synth pads in the backgroun"q
-#     # prompt="a light and cheerly EDM track, chorus, with syncopated drums, aery pads, and strong emotions bpm: 130"
-#     # prompt="A cheerful song with acoustic guitars with a lofi feel and a catchy melody, not fading away"
-#     # prompt="upbeat tropical house with a strong beat and a catchy melody, clean and short drums, no transitions, no whitenoise"
-#     # prompt="lofi slow bpm electro chill with organic samples and rhodes"
-#     prompt="A cheerful electronic dance music with a catchy melody plucky bassy house music trance"
-# )

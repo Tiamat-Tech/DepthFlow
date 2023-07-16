@@ -27,6 +27,10 @@ torchvision = {version="0.15.2", source="torch"}
 plotly = "^5.15.0"
 transformers = {git = "https://github.com/huggingface/transformers.git"}
 gradio = "^3.36.1"
+diffusers = "^0.18.2"
+invisible-watermark = "^0.2.0"
+accelerate = "^0.21.0"
+xformers = "^0.0.20"
 
 [tool.poetry.scripts]
 depthflow = "DepthFlow.__main__:main"

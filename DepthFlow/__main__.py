@@ -18,23 +18,39 @@ def gl():
     )
 
 def music(
-    prompt: str,
-    device="auto",
-    model: AudioCraftModel=AudioCraftModel.Small,
-    ):
-    ...
+    model: AudioCraftModel="small",
+    prompt: str="A cheerful electronic dance music with a catchy melody plucky bassy house music trance"
+):
+    dm = DepthMusic(AudioCraftModel.Small)
+    dm.main(
+        # prompt="An 80s driving pop song with heavy drums and synth pads in the backgroun"q
+        # prompt="a light and cheerly EDM track, chorus, with syncopated drums, aery pads, and strong emotions bpm: 130"
+        # prompt="A cheerful song with acoustic guitars with a lofi feel and a catchy melody, not fading away"
+        # prompt="upbeat tropical house with a strong beat and a catchy melody, clean and short drums, no transitions, no whitenoise"
+        # prompt="lofi slow bpm electro chill with organic samples and rhodes"
+        prompt="A cheerful electronic dance music with a catchy melody plucky bassy house music trance"
+    )
 
-
-def main():
-    # typer = BrokenBase.typer_app()
-    # typer.command()(gl)
-    # typer.command()(music)
-    # typer()
-
+def gradio_demo():
     def greet(name):
         return "Hello " + name + "!"
     demo = gradio.Interface(fn=greet, inputs="text", outputs="text")
     demo.launch()
+
+def sd_mock():
+    sd = BrokenStableDiffusion()
+    sd.load_model()
+    sd.optimize()
+    sd.prompt("Astronaut on a white rocky moon landscape").save("astronaut.png")
+
+def main():
+    typer = BrokenBase.typer_app()
+    typer.command()(gl)
+    typer.command()(music)
+    typer.command()(gradio_demo)
+    typer.command()(sd_mock)
+    typer()
+
 
 
 if __name__ == "__main__":

@@ -15,8 +15,6 @@
 </div>
 
 
-⚠️ **Warning:** This is the Develop Branch by default, for the Image to 2.5D video that *works* check out the [Master Branch](https://github.com/BrokenSource/DepthFlow/tree/Master)
-
 <br/>
 <br/>
 

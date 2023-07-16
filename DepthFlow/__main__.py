@@ -17,19 +17,18 @@ def gl():
         image="https://w.wallhaven.cc/full/85/wallhaven-85dv52.png"
     )
 
+# Ideas:
+# "An 80s driving pop song with heavy drums and synth pads in the backgroun"
+# "a light and cheerly EDM track, chorus, with syncopated drums, aery pads, and strong emotions bpm: 130
+# "A cheerful song with acoustic guitars with a lofi feel and a catchy melody, not fading away
+# "upbeat tropical house with a strong beat and a catchy melody, clean and short drums, no transitions, no whitenoise
+# "lofi slow bpm electro chill with organic samples and rhodes
 def music(
     model: AudioCraftModel="small",
     prompt: str="A cheerful electronic dance music with a catchy melody plucky bassy house music trance"
 ):
     dm = DepthMusic(AudioCraftModel.Small)
-    dm.main(
-        # prompt="An 80s driving pop song with heavy drums and synth pads in the backgroun"q
-        # prompt="a light and cheerly EDM track, chorus, with syncopated drums, aery pads, and strong emotions bpm: 130"
-        # prompt="A cheerful song with acoustic guitars with a lofi feel and a catchy melody, not fading away"
-        # prompt="upbeat tropical house with a strong beat and a catchy melody, clean and short drums, no transitions, no whitenoise"
-        # prompt="lofi slow bpm electro chill with organic samples and rhodes"
-        prompt="A cheerful electronic dance music with a catchy melody plucky bassy house music trance"
-    )
+    dm.main(prompt=prompt)
 
 def gradio_demo():
     def greet(name):

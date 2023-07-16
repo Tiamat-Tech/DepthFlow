@@ -18,9 +18,9 @@
 <br/>
 <br/>
 
-# Description
+# 🔥 Description
 
-**Base idea:**
+**💡 Base idea:**
 1. Given an image and its depth map, have a shader to generate a parallax effect
 2. Estimate Depth Maps with Neural Networks for generic images
 3. Varying the projections over time generates a 2.5D video
@@ -29,7 +29,7 @@ As simple as that, we achieve a similar effect as [Depthy](https://depthy.stamin
 
 <br/>
 
-**Upcoming:**
+**📈 Upcoming:**
 - **Feedback-loop** the parallax images to Stable Diffusion **img2img** after some initial **txt2img**
 - **Quick Visual Effects**: Vignette, particles, rotation on the base Shader
 
@@ -43,7 +43,7 @@ Some possibilities include:
 
 <br/>
 
-**Challenges:**
+**🏆 Challenges:**
 - **GPU Computation time** will be a bottleneck for longer videos or many feedback loops per second
   - _Possible solution_: Use fewer steps on img2img since it is already close to the target
   - _Implementation_: Stop when `MSE(A, B)` is low enough
@@ -54,7 +54,7 @@ Some possibilities include:
 
 <br/>
 
-**Future:**
+**👑 Future:**
 - **Keyframes:** Given a list of _keyframes_, interpolate prompts, depth maps, effects intensity
 - Maybe some form of API and **User Interface** to make it easier to use
 - **Music:** Generative music that maybe follows the video
@@ -66,12 +66,7 @@ Some possibilities include:
 
 # Installation
 
-### Package Manageer
-We are actively looking for package managers to bundle our projects, if you are interested in helping please contact us, you'll be credited here and do a great convenience service to the whole community
-
-<br/>
-
-### Prebuilt Binaries
+## 🔮 Prebuilt Binaries
 We only release prebuilt binaries with PyTorch CUDA backend exclusive to NVIDIA GPUs, don't worry, if you are on macOS or have an AMD GPU please run directly from the source code, it works just as well
 
 **Instructions**:
@@ -81,17 +76,17 @@ We only release prebuilt binaries with PyTorch CUDA backend exclusive to NVIDIA 
 - Grab the latest [DepthFlow Release](https://github.com/BrokenSource/DepthFlow/releases/latest) for your platform, run it
 
 
+
+### 📦 Package Manageer
+We are actively looking for package managers to bundle our projects, if you are interested in helping please contact us, you'll be credited here and do a great convenience service to the whole community
+
 <br/>
 
-### Running from the Source Code
+## Running from the Source Code
 Follow instructions on our [Monorepo](https://github.com/BrokenSource/BrokenSource) for downloading our Framework, and chose PyTorch acceleration method below:
 
 
-
-<br/>
-<br/>
-
-# Selecting PyTorch Acceleration Method
+### 🔦 Selecting PyTorch Acceleration Method
 PyTorch has three different packages: CPU mode only, CUDA with NVIDIA GPUs and ROCm for AMD GPUs
 
 Before running DepthFlow, select the PyTorch acceleration source package by modifying the `DepthFlow/pyproject.toml` file
@@ -107,20 +102,23 @@ You can reinstall the Python virtual environment with `broken depthflow --reinst
 <br/>
 <br/>
 
-# Requirements
-The faster the hardware (CPU, GPU, RAM), the faster the code will run. Apart from memory restrictions your hardware should support some technologies:
+# 🚧 Hardware Requirements
+The faster the hardware (CPU, GPU, RAM), the faster the code will run. Apart from memory restrictions your hardware should support some minimum technologies:
 
 - **CPU:** Any should do, affects video encoding time
-- **GPU:** Supports OpenGL 3.3 or higher<sup>*1</sup>, affects rendering time (sent to the CPU)
-  - Stable Diffusion XL: Minimum 8 GB VRAM for NVIDIA, 16 GB for AMD<sup>*2</sup>
-  - Stable Diffusion: Minimum 6 GB VRAM for NVIDIA, 8 GB for AMD<sup>*2</sup>
+- **GPU:** Supports OpenGL 3.3 or higher<sup>1</sup>, affects rendering time (sent to the CPU)
+  - Parallax mode: Very few VRAM for both NVIDIA and AMD
+  - Stable Diffusion XL: Minimum 8 GB VRAM for NVIDIA<sup>2</sup>, 16 GB for AMD<sup>3</sup>
+  - Stable Diffusion: Minimum 6 GB VRAM for NVIDIA<sup>2</sup>, 8 GB for AMD<sup>3</sup>
 - **OS:** Windows, Linux, macOS
 - **Disk:** 40 GB free space (models are big)
-- **RAM:** Minimum 12 GB, 16 GB Recommended
+- **RAM:** Minimum 12 GB, 16 GB Recommended, should be doable in 8 GB
 
-The main bottleneck 99% the time is the GPU
+The main bottleneck 99% the time is the GPU for generative images and the parallax shader projections
 
 <sub>*1: Some NVIDIA datacenter GPUs does not implement common graphics APIs, for example A100, H100</sub>
+
+<sub>*3: Your GPU must support the PyTorch's CUDA installation version, pretty much all >= GTX 900 </sub>
 
 <sub>*2: Check for compatibility with your GPU, generally speaking anything <= Polaris (<= RX 500 series) is not supported</sub>
 
@@ -129,15 +127,15 @@ The main bottleneck 99% the time is the GPU
 <br/>
 <br/>
 
-# License
+# ⚖️ License
 
-## Personal use
+## 👤 Personal use
 - **User Generated Content**: CC-BY 4.0 License
 - **Code**: AGPLv3-Only License
 
 While we won't enforce punishments for failed attributions, we would appreciate if you could credit us
 
-## Professional use
+## 🎩 Professional use
 Want to use this for your company or comercially?
 
 - Let's do something great together, contact us at [Broken Source Software](https://github.com/BrokenSource)

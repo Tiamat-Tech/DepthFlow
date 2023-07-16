@@ -106,6 +106,26 @@ Beware dragons:
 You can reinstall the Python virtual environment with `broken depthflow --reinstall` to apply the changes
 
 
+<br/>
+<br/>
+
+# Requirements
+The faster the hardware (CPU, GPU, RAM), the faster the code will run. Apart from memory restrictions your hardware should support some technologies:
+
+- **CPU:** Any should do, affects video encoding time
+- **GPU:** Supports OpenGL 3.3 or higher<sup>*1</sup>, affects rendering time (sent to the CPU)
+  - Stable Diffusion XL: Minimum 8 GB VRAM for NVIDIA, 16 GB for AMD<sup>*2</sup>
+  - Stable Diffusion: Minimum 6 GB VRAM for NVIDIA, 8 GB for AMD<sup>*2</sup>
+- **OS:** Windows, Linux, macOS
+- **Disk:** 40 GB free space (models are big)
+- **RAM:** Minimum 12 GB, 16 GB Recommended
+
+The main bottleneck 99% the time is the GPU
+
+<sub>*1: Some NVIDIA datacenter GPUs does not implement common graphics APIs, for example A100, H100</sub>
+
+<sub>*2: Check for compatibility with your GPU, generally speaking anything <= Polaris (<= RX 500 series) is not supported</sub>
+
 
 
 <br/>

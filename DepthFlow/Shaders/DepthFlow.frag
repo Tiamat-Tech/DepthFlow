@@ -56,12 +56,16 @@ vec2 center_zoom_stuv(vec2 stuv, float zoom) {
     return (stuv - 0.5) * zoom + 0.5;
 }
 
+// Repeats the coordinates "mirrored" on all sides
+vec2 wrap_stuv_mirror(vec2 stuv) {
+    return abs(1.0 - abs(stuv - 1.0));
+}
+
 // ------------------------------------------------------------------------------------------------|
 
 // Get the clamped depth of a image (no overshooting) based on camera_focus
 // - Zero depth means the object does not move
 float get_depth(vec2 stuv, sampler2D depth) {
-    stuv = clamp(stuv, 0.0, 1.0);
     return camera_focus - texture(depth, stuv).r;
 }
 
@@ -129,11 +133,14 @@ void main() {
     // Flip coords vertically
     stuv.y = 1.0 - stuv.y;
 
-    // Zoom in on the stuv coordinate since the max displacement on X or Y is $intensity
+    // Zoom in on the centered stuv coordinate
     stuv = center_zoom_stuv(stuv, camera_zoom);
 
     // Center-Rotate the stuv coordinates considering the aspect ratio
     stuv = rotate2d(camera_rotation, textureSize(image_A, 0)) * (stuv - 0.5) + 0.5;
+
+    // Repeat the coordinates on all sides
+    stuv = wrap_stuv_mirror(stuv);
 
     // Return parallax effect of the base image
     vec4 parallax_A = image_parallax(stuv, image_A, depth_A,  1);

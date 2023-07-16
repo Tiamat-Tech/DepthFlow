@@ -4,7 +4,7 @@ from Broken import *
 
 # -------------------------------------------------------------------------------------------------|
 # Torch - The bane of my existence
-
+# IDEA: Torch initialization or information should be part of something else of Broken
 warnings.filterwarnings("ignore", message="Can't initialize NVML")
 
 # Prefer CUDA if available, override with TORCH_DEVICE env variable
@@ -25,8 +25,7 @@ SHADERS_DIRECTORY     = DEPTHFLOW_DIRECTORIES.EXECUTABLE/"Shaders"
 # isort: off
 from DepthFlow.DepthFlow import *
 from DepthFlow.Presets import *
-from DepthFlow.Shaders import *
-from DepthFlow.Timeline import *
+from DepthFlow.BrokenTimeline import *
 
 # Mock
 from .DepthAudio import *

@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "DepthFlow"
-version = "2023.7.14"
+version = "2023.7.17"
 description = "Image to 2.5D Parallax Effect Video"
 authors = ["Tremeschin"]
 license = "AGPLv3-only"
@@ -22,9 +22,6 @@ intervaltree = "^3.1.0"
 # - Add source="torch" to the next line and uncomment some url on [tool.poetry.source] below
 torch = {version="^2.0.1", source="torch"}
 torchvision = {version="0.15.2", source="torch"}
-
-# FIXME: Temporary for keyframes validation, remove after
-plotly = "^5.15.0"
 transformers = {git = "https://github.com/huggingface/transformers.git"}
 gradio = "^3.36.1"
 diffusers = "^0.18.2"

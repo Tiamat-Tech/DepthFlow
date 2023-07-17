@@ -5,7 +5,7 @@ from transformers import MusicgenForConditionalGeneration
 from . import *
 
 
-class AudioCraftModel(Enum):
+class AudioCraftModel:
     Small  = "small"
     Medium = "medium"
     Melody = "melody"
@@ -14,7 +14,7 @@ class AudioCraftModel(Enum):
 class DepthMusic:
     def __init__(self, model: AudioCraftModel):
         self.DEVICE = "cuda:0" if torch.cuda.is_available() else "cpu"
-        self.MODEL_NAME = f"facebook/musicgen-{model.value}"
+        self.MODEL_NAME = f"facebook/musicgen-{model}"
 
         # Initialize models
         self.TRANSFORMERS_PROCESSOR = AutoProcessor.from_pretrained(self.MODEL_NAME)
@@ -133,7 +133,15 @@ class DepthMusic:
     def normalize(self, data: numpy.ndarray):
         return data #/ numpy.max(numpy.abs(data))
 
-    def main(self, prompt: str, initial_audio_size=3, context=10, diverge=1, imagine=1):
+    def main(self,
+        prompt: str,
+        duration=30,
+        initial_audio_size=3,
+        context=10,
+        diverge=1,
+        imagine=1,
+        mid=0.4,
+    ):
         """
         Generate audio in a loop, with a context of previous audio
         - prompt: Initial text prompt
@@ -153,30 +161,30 @@ class DepthMusic:
             # Generate left and right audio, add to chunks
             left  = self.generate(text=prompt, audio=latest, duration=imagine, extrapolate_tokens=imagine/diverge)
             right = self.generate(text=prompt, audio=latest, duration=imagine, extrapolate_tokens=imagine/diverge)
-            # right = left
             self.chunks.append((self.normalize(left), self.normalize(right)))
 
             # Mono of last N chunks that sums up to context duration
             N = int(context/diverge)
             latest = self.normalize(self.L(N) + self.R(N)) / 2
-            # latest *= numpy.linspace(0, 1, len(latest)) # Fade out
 
-            # # Calcualte final mix
+            # Check for duration
+            time = self.L().shape[0] / self.sample_rate
+            info(f"Generated [{time:.2f}/{duration:.2f}s] ({i} chunks)")
 
-            # Mono of LR
-            mono = (self.L() + self.R())/2
+            if duration < time:
+                break
 
-            # Mix mono with LR separately ("mid side")
-            mid = 0.4
-            mix = numpy.array([
-                (self.L() * mid) + (1 - mid) * mono,
-                (self.R() * mid) + (1 - mid) * mono,
-            ])
+        # # Calcualte final mix
 
-            # Normalize mix
-            # mix = mix / numpy.max(numpy.abs(mix))
+        # Mono of LR
+        mono = (self.L() + self.R())/2
 
-            # Write all chunks to audio, all L then R
-            with self.write_audio(f"chunk-{i}.opus") as write:
-                write(mix.T.astype(numpy.float32).tobytes())
-                # write(latest.astype(numpy.float32).tobytes())
+        # Mix mono with LR separately ("mid side")
+        mix = numpy.array([
+            (self.L() * mid) + (1 - mid) * mono,
+            (self.R() * mid) + (1 - mid) * mono,
+        ])
+
+        # Normalize mix
+        return mix / numpy.max(numpy.abs(mix))
+

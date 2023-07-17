@@ -24,7 +24,6 @@ SHADERS_DIRECTORY     = DEPTHFLOW_DIRECTORIES.EXECUTABLE/"Shaders"
 
 # isort: off
 from DepthFlow.DepthFlow import *
-from DepthFlow.Presets import *
 from DepthFlow.BrokenTimeline import *
 
 # Mock

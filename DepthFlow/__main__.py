@@ -1,115 +1,189 @@
 from DepthFlow import *
 
 
-def gl():
+class DepthFlowGradio:
+    def __init__(self):
+        ...
 
-    # Initialize DepthFlow
-    depthflow = DepthFlowGL()
-    depthflow.init()
+    def webui(self, share: bool=False):
+        self.components = DotMap()
 
-    # Input Path or URL
-    depthflow.upload_texture(
-        index=DepthFlowTextureIndex.A,
-        image="https://w.wallhaven.cc/full/x6/wallhaven-x61e1l.jpg"
-    )
-    depthflow.upload_texture(
-        index=DepthFlowTextureIndex.B,
-        image="https://w.wallhaven.cc/full/85/wallhaven-85dv52.png"
-    )
+        with gradio.Blocks(title="DepthFlow") as self.gradio_interface:
+            gradio.Markdown(f"DepthFlow WebUI Prototype - [GPU {torch.cuda.get_device_name()}] - [Torch {torch.__version__}]")
 
-    # Create a timeline
-    timeline = BrokenTimeline(initial_variables=DEPTHFLOW_DEFAULT_SHADER_VARIABLES)
+            with gradio.Tab("DepthVideo"):
+                with gradio.Row():
+                    self.components.parallax_imageA = gradio.Image(label="Image A")
 
-    class CircleCamera(BrokenKeyframe):
-        def __call__(self, variables, T, t, tau):
-            variables.parallax_factor = 0.15
-            variables.camera_position = (lambda z: (z.real, z.imag)) (numpy.exp(2*pi*T*1j * 0.25))
-            variables.camera_rotation = 0.03*(0.1*sin(tau) + 0.2*sin(2*tau) + 0.03*sin(10*tau))
-            variables.camera_focus = 1
-            variables.camera_zoom = 1 - variables.parallax_factor
-            variables.blend = 1.0 * atan(500*(tau/10 - 0.5))/pi + 0.5
+                with gradio.Blocks():
+                    self.components.parallax_duration     = gradio.Slider(label="Duration (seconds)", minimum=1, maximum=120, value=10, step=1, interactive=True)
+                    self.components.parallax_fps          = gradio.Slider(label="FPS", minimum=1, maximum=120, value=60, step=1, interactive=True)
+                    self.components.parallax_factor       = gradio.Slider(label="Parallax Factor", minimum=0, maximum=1, value=0.15, step=0.01, interactive=True)
+                    self.components.parallax_camera_focus = gradio.Slider(label="Camera Focus", minimum=0, maximum=1, value=1, step=0.01, interactive=True)
 
+                self.components.parallax_generate = gradio.Button("Generate")
+                self.components.parallax_video    = gradio.Video(label="Generated Video", format="mp4")
 
-    # Add keyframes
-    timeline.add_keyframe(CircleCamera() @ 0.0)
+            with gradio.Tab("DepthAudio"):
+                gradio.Markdown('\n'.join([
+                    "# Ideas:",
+                    "- An 80s driving pop song with heavy drums and synth pads in the backgroun",
+                    "- a light and cheerly EDM track, chorus, with syncopated drums, aery pads, and strong emotions bpm: 130",
+                    "- A cheerful song with acoustic guitars with a lofi feel and a catchy melody, not fading away",
+                    "- upbeat tropical house with a strong beat and a catchy melody, clean and short drums, no transitions, no whitenoise",
+                    "- lofi slow bpm electro chill with organic samples and rhodes"
+                ]))
 
-    # Render
-    fps = 60
-    duration = 10
+                self.components.music_prompt   = gradio.Textbox(label="Music Prompt", value="lofi slow bpm electro chill with organic samples and rhodes")
+                with gradio.Blocks():
+                    self.components.music_model              = gradio.Radio(["small", "medium", "melody", "large"], value="small", label="AudioCraft Model")
+                    self.components.music_duration           = gradio.Slider(label="Duration (seconds)", minimum=1, maximum=120, value=10, step=0.5, interactive=True)
+                    self.components.music_initial_audio_size = gradio.Slider(label="Initial Audio Size (seconds)", minimum=0, maximum=10, value=2, step=0.5, interactive=True)
+                    self.components.music_context_length     = gradio.Slider(label="Context Length (seconds)", minimum=0, maximum=20, value=5, step=0.5, interactive=True)
+                    self.components.music_diverge_every      = gradio.Slider(label="Diverge Every (seconds)", minimum=0, maximum=10, value=1, step=0.5, interactive=True)
+                    self.components.music_imagine_overshoot  = gradio.Slider(label="Imagine Overshoot (seconds)", minimum=0, maximum=10, value=1, step=0.5, interactive=True)
+                    self.components.music_mid                = gradio.Slider(label="Mid eq factor", minimum=0, maximum=1, value=0.4, step=0.01, interactive=True)
 
-    # Get FFmpeg binary
-    externals = BrokenExternals()
-    ffmpeg_binary = externals.get("ffmpeg")
+                self.components.music_generate = gradio.Button("Generate")
+                self.components.music_output   = gradio.Audio(label="Generated Audio", type="filepath")
 
-    # Open FFmpeg rendering to video
-    ffmpeg = shell(
-        ffmpeg_binary,
-        "-loglevel", "error",
-        "-hide_banner",
-        "-f", "rawvideo",
-        "-pix_fmt", "rgb24",
-        "-s", f"{depthflow.render_resolution[0]}x{depthflow.render_resolution[1]}",
-        "-r", fps,
-        "-i", "-",
-        # Resize to the nearest 2-multiple of self.resolution and anti aliasing filter
-        "-vf", f"scale={depthflow.video_resolution[0]//2*2}:{depthflow.video_resolution[1]//2*2}:flags=lanczos",
-        "-profile:v", "high",
-        "-preset", "slow",
-        "-tune", "film",
-        "-vcodec", "libx264",
-        "-crf", "25",
-        "-pix_fmt", "yuv420p",
-        "parallax.mp4",
-        "-y",
-        Popen=True,
-        stdin=PIPE
-    )
+            # # Actions
 
-    # Render using tqdm
-    for T in tqdm(numpy.linspace(0, duration, duration*fps), desc="Rendering Video", unit="frames"):
-        variables = timeline.at(T)
-        frame = depthflow.render(variables)
-        ffmpeg.stdin.write(frame)
+            # Set of all components, identified by inputs[component]
+            inputs = set(self.components.values())
 
+            self.components.music_generate.click(self.generate_audio, inputs=inputs, outputs=self.components.music_output)
+            self.components.parallax_generate.click(self.generate_parallax, inputs=inputs, outputs=self.components.parallax_video)
 
+        # Launch interface
+        self.gradio_interface.launch(
+            share=share, # Generate public link
+            inbrowser=True, # Open URL on default browser
+            server_name="0.0.0.0" # Be available on local network
+        )
 
-# Ideas:
-# "An 80s driving pop song with heavy drums and synth pads in the backgroun"
-# "a light and cheerly EDM track, chorus, with syncopated drums, aery pads, and strong emotions bpm: 130
-# "A cheerful song with acoustic guitars with a lofi feel and a catchy melody, not fading away
-# "upbeat tropical house with a strong beat and a catchy melody, clean and short drums, no transitions, no whitenoise
-# "lofi slow bpm electro chill with organic samples and rhodes
-def music(
-    model: AudioCraftModel="small",
-    prompt: str="A cheerful electronic dance music with a catchy melody plucky bassy house music trance"
-):
-    dm = DepthMusic(AudioCraftModel.Small)
-    dm.main(prompt=prompt)
+    def fish_components(self, components):
+        """
+        Gradio needs inputs=List, outputs=List, so we convert every self.component.name to self.name as their value
+        Requires sending inputs=set(self.components.values()) when adding event listeners. Call this before callable actions
+        """
+        for name, component in self.components.items():
+            setattr(self, name, components[component])
 
+    def generate_audio(self, components):
+        self.fish_components(components)
+        self.depthmusic = DepthMusic(self.music_model)
 
-def gradio_demo():
-    def greet(name):
-        return "Hello " + name + "!"
-    demo = gradio.Interface(fn=greet, inputs="text", outputs="text")
-    demo.launch()
+        audio = self.depthmusic.main(
+            prompt=self.music_prompt,
+            duration=self.music_duration,
+            initial_audio_size=self.music_initial_audio_size,
+            context=self.music_context_length,
+            diverge=self.music_diverge_every,
+            imagine=self.music_imagine_overshoot,
+        )
 
+        # Return (sample_rate, audio)
+        return (int(self.depthmusic.sample_rate), audio.T)
 
-def sd_mock():
-    sd = BrokenStableDiffusion()
-    sd.load_model()
-    sd.optimize()
-    sd.prompt("Astronaut on a white rocky moon landscape").save("astronaut.png")
+    def generate_parallax(self, components):
+        self.fish_components(components)
 
+        from PIL import Image
+
+        # FIXME: Initializing DepthFlowGL on __init__ causes a segfault, something to do with Gradio threads ofc
+        self.depthflowgl = DepthFlowGL()
+        self.depthflowgl.init()
+
+        # Input Path or URL
+        self.depthflowgl.upload_texture(
+            index=DepthFlowTextureIndex.A,
+            image=Image.fromarray(self.parallax_imageA),
+        )
+        self.depthflowgl.upload_texture(
+            index=DepthFlowTextureIndex.B,
+            image="https://w.wallhaven.cc/full/85/wallhaven-85dv52.png"
+        )
+
+        initial_variables = DEPTHFLOW_DEFAULT_SHADER_VARIABLES
+        initial_variables.parallax_factor = self.parallax_factor
+        initial_variables.camera_focus    = self.parallax_camera_focus
+
+        # Create a timeline
+        timeline = BrokenTimeline(initial_variables=initial_variables)
+
+        # FIXME: Realistically speaking, how to
+        class CircleCamera(BrokenKeyframe):
+            def __call__(self, variables, T, t, tau):
+                variables.camera_position = (lambda z: (z.real, z.imag)) (numpy.exp(2*pi*T*1j * 0.25))
+                variables.camera_rotation = 0.03*(0.1*sin(tau) + 0.2*sin(2*tau) + 0.03*sin(10*tau))
+                variables.camera_zoom = 1 - variables.parallax_factor
+                # variables.parallax_factor = 0.15
+                # variables.camera_focus = 1
+                # variables.blend = 1.0 * atan(500*(tau/10 - 0.5))/pi + 0.5
+
+        # Add keyframes
+        timeline.add_keyframe(CircleCamera() @ 0.0)
+
+        # Get FFmpeg binary
+        externals = BrokenExternals()
+        ffmpeg_binary = externals.get("ffmpeg")
+
+        # Random video output name
+        video_output = DEPTHFLOW_DIRECTORIES.TEMP/f"{uuid.uuid4()}.mp4"
+
+        # Open FFmpeg rendering to video
+        ffmpeg = shell(
+            ffmpeg_binary,
+            "-loglevel", "error",
+            "-hide_banner",
+            "-f", "rawvideo",
+            "-pix_fmt", "rgb24",
+            "-s", f"{self.depthflowgl.render_resolution[0]}x{self.depthflowgl.render_resolution[1]}",
+            "-r", self.parallax_fps,
+            "-i", "-",
+            # Resize to the nearest 2-multiple of self.resolution and anti aliasing filter
+            "-vf", f"scale={self.depthflowgl.video_resolution[0]//2*2}:{self.depthflowgl.video_resolution[1]//2*2}:flags=lanczos",
+            "-profile:v", "high",
+            "-preset", "slow",
+            "-tune", "film",
+            "-vcodec", "libx264",
+            "-crf", "25",
+            "-pix_fmt", "yuv420p",
+            video_output,
+            "-y",
+            Popen=True,
+            stdin=PIPE
+        )
+
+        # Progress bar rendering timeline and frames to FFmpeg
+        time_linspace = numpy.linspace(0, self.parallax_duration, self.parallax_duration*self.parallax_fps)
+        for T in tqdm(time_linspace, desc="Rendering Video", unit="frames"):
+            variables = timeline.at(T)
+            frame = self.depthflowgl.render(variables)
+            ffmpeg.stdin.write(frame)
+
+        # Wait video encoding to finish
+        ffmpeg.stdin.close()
+        ffmpeg.wait()
+
+        # Delete temporary video after 1 minute
+        def deletes_video():
+            sleep(60)
+            video_output.unlink()
+        Thread(target=deletes_video).start()
+
+        return str(video_output)
+
+    def stable_diffusion_mock(self):
+        sd = BrokenStableDiffusion()
+        sd.load_model()
+        sd.optimize()
+        sd.prompt("Astronaut on a white rocky moon landscape").save("astronaut.png")
 
 def main():
-    typer = BrokenBase.typer_app()
-    typer.command()(gl)
-    typer.command()(music)
-    typer.command()(gradio_demo)
-    typer.command()(sd_mock)
-    typer()
-
-
+    depthflow_gradio = DepthFlowGradio()
+    depthflow_gradio.webui()
 
 if __name__ == "__main__":
     main()

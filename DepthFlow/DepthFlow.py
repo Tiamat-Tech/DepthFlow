@@ -129,10 +129,14 @@ class DepthFlowGL:
     # # OpenGL / Shaders
 
     def init(self):
+        """Initialize OpenGL and Shaders"""
+
         # Create OpenGL Context
+        info("Creating OpenGL Context")
         self.opengl_context = moderngl.create_standalone_context()
 
         # Initialize program and shaders
+        info("Initializing OpenGL Program and Shaders")
         self.program = self.opengl_context.program(
             vertex_shader=(SHADERS_DIRECTORY/"DepthFlow.vert").read_text(),
             fragment_shader=(SHADERS_DIRECTORY/"DepthFlow.frag").read_text(),
@@ -156,6 +160,7 @@ class DepthFlowGL:
         )
 
         # Create VBO and VAO objects
+        info("Creating OpenGL VBO and VAO objects")
         self.vbo = self.opengl_context.buffer(vertices)
         self.vao = self.opengl_context.simple_vertex_array(self.program, self.vbo, "render_vertex", "coords_vertex")
         self.fbo = None

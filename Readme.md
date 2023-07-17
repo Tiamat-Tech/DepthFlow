@@ -9,7 +9,7 @@
 
   Image → **2.5D Parallax** Effect Video
 
-  Eventual **Text to Video** powered by Stable Diffusion
+  Eventual **Text to Video** powered by **Stable Diffusion**
 
   <img src="https://api.star-history.com/svg?repos=BrokenSource/DepthFlow&type=Timeline" width=500/>
 </div>
@@ -25,7 +25,13 @@
 2. Estimate Depth Maps with Neural Networks for generic images
 3. Varying the projections over time generates a 2.5D video
 
-As simple as that, we achieve a similar effect as [Depthy](https://depthy.stamina.pl)
+As simple as that, we achieve a similar effect as [**Depthy**](https://depthy.stamina.pl)
+
+- 🤗 All of that with an WebUI powered by [**Gradio**](https://www.gradio.app/)
+
+**Currently,** we have:
+- 🎥 Interface for Image to Parallax Video
+- 🎵 Interface for AI Stereo Music using [**AudioCraft**](https://github.com/facebookresearch/audiocraft)
 
 <br/>
 
@@ -103,18 +109,28 @@ You can reinstall the Python virtual environment with `broken depthflow --reinst
 <br/>
 
 # 🚧 Hardware Requirements
+<div align="center">
+  Dear user with weak specs, you can only do so much on a limited hardware
+</div>
+
+<br/>
 The faster the hardware (CPU, GPU, RAM), the faster the code will run. Apart from memory restrictions your hardware should support some minimum technologies:
 
 - **CPU:** Any should do, affects video encoding time
 - **GPU:** Supports OpenGL 3.3 or higher<sup>1</sup>, affects rendering time (sent to the CPU)
   - Parallax mode: Very few VRAM for both NVIDIA and AMD
-  - Stable Diffusion XL: Minimum 8 GB VRAM for NVIDIA<sup>2</sup>, 16 GB for AMD<sup>3</sup>
-  - Stable Diffusion: Minimum 6 GB VRAM for NVIDIA<sup>2</sup>, 8 GB for AMD<sup>3</sup>
-- **OS:** Windows, Linux, macOS
-- **Disk:** 40 GB free space (models are big)
+  - Stable Diffusion:
+    - *Extra Large*: Minimum 8 GB VRAM for NVIDIA<sup>2</sup>, 16 GB for AMD<sup>3</sup>
+    - *Previous*: Minimum 6 GB VRAM for NVIDIA<sup>2</sup>, 8 GB for AMD<sup>3</sup>
+  - AudioCraft:
+    - Runnable on 4 GB for NVIDIA small model context length 5, (hangs on AMD?)
+    - Likely minimum 8 GB for NVIDIA medium size, ideally 12 GB or 16 GB
+- **OS:** Windows (10+), Linux, macOS - 64 bits
+- **Disk:** Roughly 30 GB free space (models and dependencies are big)
 - **RAM:** Minimum 12 GB, 16 GB Recommended, should be doable in 8 GB
 
 The main bottleneck 99% the time is the GPU for generative images and the parallax shader projections
+
 
 <sub>*1: Some NVIDIA datacenter GPUs does not implement common graphics APIs, for example A100, H100</sub>
 

@@ -1,12 +1,15 @@
 [tool.poetry]
 name = "DepthFlow"
-version = "2023.7.17"
+version = "2023.7.18"
 description = "Image to 2.5D Parallax Effect Video"
 authors = ["Tremeschin"]
 license = "AGPLv3-only"
 
 [[tool.poetry.packages]]
 include = "DepthFlow"
+
+[tool.poetry.scripts]
+depthflow = "DepthFlow.__main__:main"
 
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
@@ -17,27 +20,22 @@ imageio-ffmpeg = "^0.4.8"
 webuiapi = "^0.9.3"
 timm = "0.6.7"
 intervaltree = "^3.1.0"
-
-# Don't have NVIDIA GPU or want to run nightly/cpu only?
-# - Add source="torch" to the next line and uncomment some url on [tool.poetry.source] below
-torch = {version="^2.0.1", source="torch"}
-torchvision = {version="0.15.2", source="torch"}
-transformers = {git = "https://github.com/huggingface/transformers.git"}
 gradio = "^3.36.1"
 diffusers = "^0.18.2"
 invisible-watermark = "^0.2.0"
 accelerate = "^0.21.0"
 xformers = "^0.0.20"
+transformers = "^4.31.0"
+torch = {version="^2.0.1", source="torch"}
 
-[tool.poetry.scripts]
-depthflow = "DepthFlow.__main__:main"
+# For AMD GPU with ROCm or CPU only, uncomment the following section and replace the
+# `torch = "version"` line above with `torch = {version="version", source="torch"}`
+# Do the same for torchvision, then uncomment some url source based on your platform
+# · Thanks: https://github.com/python-poetry/poetry/issues/6409#issuecomment-1561521272
 
 [[tool.poetry.source]]
 name = "torch"
 priority = "explicit"
-
-# For AMD GPU with ROCm or CPU only, uncomment the correct line below and change torch source
-# · Thanks: https://github.com/python-poetry/poetry/issues/6409#issuecomment-1561521272
 
 # FIXME: Maybe MacOS ?
 # url = "https://download.pytorch.org/whl"

@@ -40,13 +40,13 @@ class DepthFlowMDE:
 
         # The model has changed
         if not self.mde.model:
-            warning(f"Loading new Monocular Depth Estimation Model [{self.mde.name}]")
+            log.warning(f"Loading new Monocular Depth Estimation Model [{self.mde.name}]")
 
             if self.mde.type == "transformers":
                 self.mde.model = torch.hub.load(*self.mde.repository, pretrained=True)
-                self.mde.model.to(TORCH_DEVICE)
+                self.mde.model.to("cpu")
 
-        success("Depth Map Estimator Model loaded")
+        log.success("Depth Map Estimator Model loaded")
 
     def depth_map(self, image: Union[PilImage, PathLike, URL], normalized=True, cache=True) -> PilImage:
         """Monocular Depth Map Estimation"""
@@ -57,23 +57,23 @@ class DepthFlowMDE:
         # Calculate hash of the image for caching
         image_hash = hashlib.md5(image.tobytes()).hexdigest()
         cache_path = DEPTHFLOW_DIRECTORIES.CACHE/f"{image_hash}-{self.mde.name}.jpg"
-        info(f"Image hash for Depth Map cache is [{image_hash}]")
+        log.info(f"Image hash for Depth Map cache is [{image_hash}]")
 
         # If the depth map is cached, return it
         if cache and cache_path.exists():
-            success(f"Depth map already cached on [{cache_path}]")
+            log.success(f"Depth map already cached on [{cache_path}]")
             return BrokenSmart.load_image(cache_path).convert("L")
 
         # Load base image, estimate the depth map, save to cache
         self.__load_depth_model()
 
         # Estimate Depth Map
-        warning("Estimating Depth Map for input image (Might take a while, heavy on CPU or GPU)")
+        log.warning("Estimating Depth Map for input image (Might take a while, heavy on CPU or GPU)")
         # with halo.Halo():
         if "Zoe" in self.mde.name:
             depth_map = self.mde.model.infer_pil(image)
         else:
-            error(f"Unknown Monocular Depth Estimation Model [{self.mde}]")
+            log.error(f"Unknown Monocular Depth Estimation Model [{self.mde}]")
 
         # Normalize the depth map to (0, 1) based on the min and max values
         if normalized:
@@ -82,7 +82,7 @@ class DepthFlowMDE:
 
             # Calculate the normalization factor
             if (normalize := depth_map.max() - depth_map.min()) == 0:
-                warning("Depth map (min(D) = max(D)), something went wrong on the depth estimation? Using as it is")
+                log.warning("Depth map (min(D) = max(D)), something went wrong on the depth estimation? Using as it is")
             else:
                 depth_map = 255 * (depth_map - depth_map.min()) / normalize
 
@@ -91,7 +91,7 @@ class DepthFlowMDE:
 
         # Save image to Cache
         if cache:
-            success(f"Saving depth map to cache path [{cache_path}]")
+            log.success(f"Saving depth map to cache path [{cache_path}]")
             depth_map.save(cache_path)
 
         return depth_map
@@ -99,7 +99,7 @@ class DepthFlowMDE:
 # -------------------------------------------------------------------------------------------------|
 
 class DepthFlowTextureIndex(Enum):
-    A = (0, 1)
+    A = (0, 5)
     B = (2, 3)
 
 # Default shader pipelines
@@ -132,14 +132,14 @@ class DepthFlowGL:
         """Initialize OpenGL and Shaders"""
 
         # Create OpenGL Context
-        info("Creating OpenGL Context")
+        log.info("Creating OpenGL Context")
         self.opengl_context = moderngl.create_standalone_context()
 
         # Initialize program and shaders
-        info("Initializing OpenGL Program and Shaders")
+        log.info("Initializing OpenGL Program and Shaders")
         self.program = self.opengl_context.program(
-            vertex_shader=(SHADERS_DIRECTORY/"DepthFlow.vert").read_text(),
-            fragment_shader=(SHADERS_DIRECTORY/"DepthFlow.frag").read_text(),
+            vertex_shader=(DEPTHFLOW_DIRECTORIES.SHADERS/"DepthFlow.vert").read_text(),
+            fragment_shader=(DEPTHFLOW_DIRECTORIES.SHADERS/"DepthFlow.frag").read_text(),
         )
 
         # Define vertices: pairs of [vec2 render_vertex] and [vec2 coords_vertex]
@@ -160,7 +160,7 @@ class DepthFlowGL:
         )
 
         # Create VBO and VAO objects
-        info("Creating OpenGL VBO and VAO objects")
+        log.info("Creating OpenGL VBO and VAO objects")
         self.vbo = self.opengl_context.buffer(vertices)
         self.vao = self.opengl_context.simple_vertex_array(self.program, self.vbo, "render_vertex", "coords_vertex")
         self.fbo = None
@@ -193,8 +193,8 @@ class DepthFlowGL:
 
     def _upload_texture(self, name: str, texture: PilImage, index: int, channels: int=3) -> None:
         """Internal: Upload a texture to the GPU and send it to the shader at a variable name"""
-        info(f"• Uploading Texture to OpenGL")
-        info(f"└─ Info: [{name} ({texture.size[0]}x{texture.size[1]}x{channels}) @ Index {index}]")
+        log.info(f"• Uploading Texture to OpenGL")
+        log.info(f"└─ Info: [{name} ({texture.size[0]}x{texture.size[1]}x{channels}) @ Index {index}]")
 
         # Do the ModernGL magic
         texture = self.opengl_context.texture(texture.size, channels, texture.tobytes())
@@ -228,8 +228,8 @@ class DepthFlowGL:
             self.fbo.release()
         else:
             return
-        info(f"• Creating new main Frame Buffer Object")
-        info(f"└─  Resolution: [{self.render_resolution[0]}x{self.render_resolution[1]}]")
+        log.info(f"• Creating new main Frame Buffer Object")
+        log.info(f"└─  Resolution: [{self.render_resolution[0]}x{self.render_resolution[1]}]")
         self.fbo = self.opengl_context.simple_framebuffer(self.render_resolution)
         self.fbo.use()
 

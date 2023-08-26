@@ -143,8 +143,8 @@ void main() {
     stuv = wrap_stuv_mirror(stuv);
 
     // Return parallax effect of the base image
-    vec4 parallax_A = image_parallax(stuv, image_A, depth_A,  1);
-    vec4 parallax_B = image_parallax(stuv, image_B, depth_B, -1);
+    vec4 parallax_A = image_parallax(stuv, image_A, depth_A, 1);
+    vec4 parallax_B = image_parallax(stuv, image_B, depth_B, 1);
 
     // Mix TextureA and TextureB
     color.rgb = mix(parallax_A, parallax_B, blend).rgb;

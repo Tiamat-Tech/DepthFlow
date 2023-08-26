@@ -16,7 +16,7 @@ class Interpolation:
 
     def sine(a, b, t, clamp=True):
         """Smooth interpolation with the shape of a sine wave"""
-        return Interpolation.lerp(a, b, sin(t*pi/2), clamp)
+        return Interpolation.lerp(a, b, sin(t*math.pi/2), clamp)
 
     def step(a, t):
         """Steps to 1 at t >= a else zero"""
@@ -42,7 +42,7 @@ class Continuous:
 
     def sine(T: float, frequency: float=1, amplitude: float=1, offset: float=0) -> float:
         """Standard well known generic sine wave. Range: [-1, 1]"""
-        return amplitude * sin(2*pi*frequency*T + offset)
+        return amplitude * sin(2*math.pi*frequency*T + offset)
 
     # # Basic waves
 
@@ -52,7 +52,7 @@ class Continuous:
 
     def square(T: float, frequency: float=1, amplitude: float=1, offset: float=0) -> float:
         """Standard generic square wave. Range [-1, 1], starts at 1"""
-        return amplitude * sign(sin(2*pi*frequency*T + offset))
+        return amplitude * sign(sin(2*math.pi*frequency*T + offset))
 
     def triangle(T: float, frequency: float=1, amplitude: float=1, offset: float=0) -> float:
         """Standard generic triangle wave. Range [0, 1], starts at 0"""
@@ -84,11 +84,11 @@ class BrokenKeyframe(ABC):
     def __matmul__(self, times: Union[float, Tuple[float, float]]) -> Self:
         """Define the time of a keyframe with @ (start, end)"""
         if isinstance(times, float):
-            times = (times, inf)
+            times = (times, math.inf)
 
         # Unpack tuple, show info, return
         self.start, self.end = times
-        info(f"• Created Keyframe ({self.start:5.2f}s - {self.end:5.2f}s): [{self.__class__.__name__}] ")
+        log.info(f"• Created Keyframe ({self.start:5.2f}s - {self.end:5.2f}s): [{self.__class__.__name__}] ")
         return self
 
     def _normalized_time(self, T: float) -> float:
@@ -171,7 +171,7 @@ def test_timeline():
         variables = timeline.at(T)
 
         for key, value in variables.items():
-            info(f"├─ {key.ljust(20)} = {value}")
+            log.info(f"├─ {key.ljust(20)} = {value}")
             Y.setdefault(key, []).append(value)
 
     # Create plot

@@ -1,8 +1,8 @@
 [tool.poetry]
 name = "DepthFlow"
-version = "2023.7.18"
+version = "2023.8.10"
 description = "Image to 2.5D Parallax Effect Video"
-authors = ["Tremeschin"]
+authors = ["Tremeschin <tremeschin@users.noreply.github.com>"]
 license = "AGPLv3-only"
 
 [[tool.poetry.packages]]
@@ -27,11 +27,13 @@ accelerate = "^0.21.0"
 xformers = "^0.0.20"
 transformers = "^4.31.0"
 torch = {version="^2.0.1", source="torch"}
+torchvision = {version="^0.15.2+cu118", source="torch"}
 
 # For AMD GPU with ROCm or CPU only, uncomment the following section and replace the
 # `torch = "version"` line above with `torch = {version="version", source="torch"}`
 # Do the same for torchvision, then uncomment some url source based on your platform
 # · Thanks: https://github.com/python-poetry/poetry/issues/6409#issuecomment-1561521272
+typer = "^0.9.0"
 
 [[tool.poetry.source]]
 name = "torch"

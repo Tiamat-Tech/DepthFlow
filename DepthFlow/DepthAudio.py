@@ -1,6 +1,5 @@
 import torch
-from transformers import AutoProcessor
-from transformers import MusicgenForConditionalGeneration
+from transformers import AutoProcessor, MusicgenForConditionalGeneration
 
 from . import *
 
@@ -169,7 +168,7 @@ class DepthMusic:
 
             # Check for duration
             time = self.L().shape[0] / self.sample_rate
-            info(f"Generated [{time:.2f}/{duration:.2f}s] ({i} chunks)")
+            log.info(f"Generated [{time:.2f}/{duration:.2f}s] ({i} chunks)")
 
             if duration < time:
                 break

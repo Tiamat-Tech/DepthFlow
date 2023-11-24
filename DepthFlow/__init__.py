@@ -1,4 +1,7 @@
+import gradio
 import torch
+import transformers
+from ShaderFlow import *
 
 from Broken import *
 
@@ -19,13 +22,10 @@ log.info(f"└─ Torch Version:  [{torch.__version__}]")
 # -------------------------------------------------------------------------------------------------|
 
 # Directories
-DEPTHFLOW_DIRECTORIES = BrokenDirectories(app_name="DepthFlow", app_author="BrokenSource")
+DEPTHFLOW_DIRECTORIES         = BrokenDirectories(app_name="DepthFlow")
 DEPTHFLOW_DIRECTORIES.SHADERS = DEPTHFLOW_DIRECTORIES.RESOURCES/"Shaders"
 
 # isort: off
+from DepthFlow.DepthAudio import *
 from DepthFlow.DepthFlow import *
 from DepthFlow.BrokenTimeline import *
-
-# Mock
-from .DepthAudio import *
-

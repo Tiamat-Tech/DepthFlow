@@ -2,14 +2,14 @@ from DepthFlow import *
 
 
 class DepthFlowGradio:
-    def __init__(self):
-        self.depthmusic = DepthMusic("small")
-
     def webui(self, share: bool=False):
         self.components = DotMap()
 
         with gradio.Blocks(title="DepthFlow") as self.gradio_interface:
-            gradio.Markdown(f"DepthFlow WebUI Prototype - [GPU {torch.cuda.get_device_name()}] - [Torch {torch.__version__}]")
+            if torch.cuda.is_available():
+                gradio.Markdown(f"DepthFlow WebUI Prototype - [GPU {torch.cuda.get_device_name()}] - [Torch {torch.__version__}]")
+            else:
+                gradio.Markdown(f"DepthFlow WebUI Prototype - [CPU] - [Torch {torch.__version__}]")
 
             with gradio.Tab("DepthVideo"):
                 with gradio.Row():
@@ -18,41 +18,17 @@ class DepthFlowGradio:
                 with gradio.Blocks():
                     self.components.parallax_duration     = gradio.Slider(label="Duration (seconds)", minimum=1, maximum=120, value=10, step=1, interactive=True)
                     self.components.parallax_fps          = gradio.Slider(label="FPS", minimum=1, maximum=120, value=60, step=1, interactive=True)
-                    self.components.parallax_factor       = gradio.Slider(label="Parallax Factor", minimum=0, maximum=1, value=0.08, step=0.01, interactive=True)
+                    self.components.parallax_factor       = gradio.Slider(label="Parallax Factor", minimum=0, maximum=1, value=0.25, step=0.01, interactive=True)
                     self.components.parallax_camera_focus = gradio.Slider(label="Camera Focus", minimum=0, maximum=1, value=1, step=0.01, interactive=True)
 
                 self.components.parallax_generate = gradio.Button("Generate")
                 self.components.parallax_video    = gradio.Video(label="Generated Video", format="mp4")
-
-            with gradio.Tab("DepthAudio"):
-                gradio.Markdown('\n'.join([
-                    "# Ideas:",
-                    "- An 80s driving pop song with heavy drums and synth pads in the backgroun",
-                    "- a light and cheerly EDM track, chorus, with syncopated drums, aery pads, and strong emotions bpm: 130",
-                    "- A cheerful song with acoustic guitars with a lofi feel and a catchy melody, not fading away",
-                    "- upbeat tropical house with a strong beat and a catchy melody, clean and short drums, no transitions, no whitenoise",
-                    "- lofi slow bpm electro chill with organic samples and rhodes"
-                ]))
-
-                self.components.music_prompt   = gradio.Textbox(label="Music Prompt", value="lofi slow bpm electro chill with organic samples and rhodes")
-                with gradio.Blocks():
-                    # self.components.music_model              = gradio.Radio(["small", "medium", "melody", "large"], value="small", label="AudioCraft Model")
-                    self.components.music_duration           = gradio.Slider(label="Duration (seconds)", minimum=1, maximum=120, value=10, step=0.5, interactive=True)
-                    self.components.music_initial_audio_size = gradio.Slider(label="Initial Audio Size (seconds)", minimum=0, maximum=10, value=2, step=0.5, interactive=True)
-                    self.components.music_context_length     = gradio.Slider(label="Context Length (seconds)", minimum=0, maximum=20, value=5, step=0.5, interactive=True)
-                    self.components.music_diverge_every      = gradio.Slider(label="Diverge Every (seconds)", minimum=0, maximum=10, value=1, step=0.5, interactive=True)
-                    self.components.music_imagine_overshoot  = gradio.Slider(label="Imagine Overshoot (seconds)", minimum=0, maximum=10, value=1, step=0.5, interactive=True)
-                    self.components.music_mid                = gradio.Slider(label="Mid eq factor", minimum=0, maximum=1, value=0.4, step=0.01, interactive=True)
-
-                self.components.music_generate = gradio.Button("Generate")
-                self.components.music_output   = gradio.Audio(label="Generated Audio", type="filepath")
 
             # # Actions
 
             # Set of all components, identified by inputs[component]
             inputs = set(self.components.values())
 
-            self.components.music_generate.click(self.generate_audio, inputs=inputs, outputs=self.components.music_output)
             self.components.parallax_generate.click(self.generate_parallax, inputs=inputs, outputs=self.components.parallax_video)
 
         # Launch interface
@@ -69,22 +45,6 @@ class DepthFlowGradio:
         """
         for name, component in self.components.items():
             setattr(self, name, components[component])
-
-    def generate_audio(self, components):
-        self.fish_components(components)
-
-        audio = self.depthmusic.main(
-            prompt=self.music_prompt,
-            duration=self.music_duration,
-            initial_audio_size=self.music_initial_audio_size,
-            context=self.music_context_length,
-            diverge=self.music_diverge_every,
-            imagine=self.music_imagine_overshoot,
-        )
-        sample_rate = int(self.depthmusic.sample_rate)
-
-        # Return (sample_rate, audio)
-        return (sample_rate, audio.T)
 
     def generate_parallax(self, components):
         self.fish_components(components)
@@ -114,20 +74,39 @@ class DepthFlowGradio:
 
         # FIXME: Realistically speaking, how to
         class CircleCamera(BrokenKeyframe):
+            def __init__(self):
+                self.position_noise = SombreroNoise(
+                    frequency=0.15,
+                    roughness=0.3,
+                    octaves=6,
+                    dimensions=2
+                )
+
+                self.rotation_noise = SombreroNoise(
+                    frequency=0.4,
+                    roughness=0.35,
+                    octaves=4,
+                    dimensions=1
+                )
+
+                self.zoom_noise = SombreroNoise(
+                    frequency=0.2,
+                    roughness=0.5,
+                    octaves=3,
+                    dimensions=1
+                )
+
             def __call__(self, variables, T, t, tau):
-                variables.camera_position = (lambda z: (z.real, z.imag)) (numpy.exp(2*math.pi*T*1j * 0.25))
-                variables.camera_rotation = 0.03*(0.1*math.sin(tau) + 0.2*math.sin(2*tau) + 0.03*math.sin(10*tau))
-                variables.camera_zoom = 1 - variables.parallax_factor
+                variables.camera_position = self.position_noise.at(T)
+                variables.camera_rotation = 0.013 * self.rotation_noise.at(T)
+                variables.camera_zoom = 1 - 0.25*variables.parallax_factor + 0.06*self.zoom_noise.at(T)
+
                 # variables.parallax_factor = 0.15
                 # variables.camera_focus = 1
                 # variables.blend = 1.0 * atan(500*(tau/10 - 0.5))/math.pi + 0.5
 
         # Add keyframes
         timeline.add_keyframe(CircleCamera() @ 0.0)
-
-        # Get FFmpeg binary
-        # externals = BrokenExternals()
-        # ffmpeg_binary = externals.get("ffmpeg")
 
         # Random video output name
         video_output = DEPTHFLOW_DIRECTORIES.TEMP/f"{uuid.uuid4()}.mp4"
@@ -175,10 +154,9 @@ class DepthFlowGradio:
 
         return str(video_output)
 
-
 def main():
     depthflow_gradio = DepthFlowGradio()
-    depthflow_gradio.webui()
+    depthflow_gradio.webui(share=False)
 
 if __name__ == "__main__":
     main()

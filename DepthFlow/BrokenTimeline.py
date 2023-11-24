@@ -164,7 +164,7 @@ def test_timeline():
 
     # Axis
     X = linspace(0, 1, 1001)
-    Y = dict()
+    Y = list()
 
     for T in X:
         success(f"• Time: {T:.2f}s", )

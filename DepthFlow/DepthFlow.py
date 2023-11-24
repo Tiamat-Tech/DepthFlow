@@ -35,6 +35,10 @@ class DepthFlowMDE:
 
         self.mde = model
 
+    @property
+    def device(self) -> str:
+        return "cuda:0" if torch.cuda.is_available() else "cpu"
+
     def __load_depth_model(self):
         """Load depth estimation transformer if needed"""
 
@@ -44,7 +48,7 @@ class DepthFlowMDE:
 
             if self.mde.type == "transformers":
                 self.mde.model = torch.hub.load(*self.mde.repository, pretrained=True)
-                self.mde.model.to("cpu")
+                self.mde.model.to(self.device)
 
         log.success("Depth Map Estimator Model loaded")
 

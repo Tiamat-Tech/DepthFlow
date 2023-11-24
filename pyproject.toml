@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "DepthFlow"
-version = "2023.8.10"
+version = "2023.11.24"
 description = "Image to 2.5D Parallax Effect Video"
 authors = ["Tremeschin <tremeschin@users.noreply.github.com>"]
 license = "AGPLv3-only"
@@ -11,45 +11,39 @@ include = "DepthFlow"
 [tool.poetry.scripts]
 depthflow = "DepthFlow.__main__:main"
 
+[tool.poe.tasks]
+_uninstall_torch    = "python -m pip uninstall -y torch torchvision torchaudio"
+_install_torch_cuda = "python -m pip install torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118"
+_install_torch_rocm = "python -m pip install torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/rocm5.6"
+_install_torch_cpu  = "python -m pip install torch==2.0.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu"
+cuda = ["_uninstall_torch", "_install_torch_cuda"]
+rocm = ["_uninstall_torch", "_install_torch_rocm"]
+cpu  = ["_uninstall_torch", "_install_torch_cpu"]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
-broken = {path="../../", develop=true}
-moderngl = "^5.8.2"
-numpy = "^1.25.0"
-imageio-ffmpeg = "^0.4.8"
-webuiapi = "^0.9.3"
-timm = "0.6.7"
-intervaltree = "^3.1.0"
+broken = {path="/Broken", develop=true}
+shaderflow = {path="/Broken/Projects/ShaderFlow", develop=true}
+torch = {version="2.0.1", source="torch-cpu"}
+transformers = "^4.35.2"
 gradio = "^3.36.1"
-diffusers = "^0.18.2"
-invisible-watermark = "^0.2.0"
-accelerate = "^0.21.0"
-xformers = "^0.0.20"
-transformers = "^4.31.0"
-torch = {version="^2.0.1", source="torch"}
-torchvision = {version="^0.15.2+cu118", source="torch"}
-
-# For AMD GPU with ROCm or CPU only, uncomment the following section and replace the
-# `torch = "version"` line above with `torch = {version="version", source="torch"}`
-# Do the same for torchvision, then uncomment some url source based on your platform
-# · Thanks: https://github.com/python-poetry/poetry/issues/6409#issuecomment-1561521272
-typer = "^0.9.0"
+timm = "0.6.7"
 
 [[tool.poetry.source]]
-name = "torch"
+name = "torch-cpu"
 priority = "explicit"
+url = "https://download.pytorch.org/whl/cpu"
 
-# FIXME: Maybe MacOS ?
-# url = "https://download.pytorch.org/whl"
-
-# CPU Only
-# url = "https://download.pytorch.org/whl/cpu"
-
-# AMD GPU - ROCm
-# url = "https://download.pytorch.org/whl/rocm5.4.2"
-# url = "https://download.pytorch.org/whl/nightly/rocm5.5"
-
-# NVIDIA GPU - CUDA
+[[tool.poetry.source]]
+name = "torch-cuda"
+priority = "explicit"
 url = "https://download.pytorch.org/whl/cu118"
-# url = "https://download.pytorch.org/whl/nightly/cu118"
-# url = "https://download.pytorch.org/whl/nightly/cu121"
+
+[[tool.poetry.source]]
+name = "torch-rocm"
+priority = "explicit"
+url = "https://download.pytorch.org/whl/rocm5.4.2"

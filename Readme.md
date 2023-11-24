@@ -3,17 +3,18 @@
 <div align="justify">
 
 <div align="center">
+  <!-- Logo -->
   <img src="https://github.com/BrokenSource/DepthFlow/assets/29046864/9ea5fbd4-4f3e-4742-9a36-d6b8b6f02b65" width="160">
 
   <h1>DepthFlow</h1>
 
+  <!-- Visitor count -->
   <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fhits.dwyl.com%2FBrokenSource%2FDepthFlow.json%3Fshow%3Dunique&label=Visitors&color=blue"/>
   <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fhits.dwyl.com%2FBrokenSource%2FDepthFlow.json&label=Page%20Views&color=blue"/>
 
   Image → **2.5D Parallax** Effect Video
 
-  Eventual **Text to Video** powered by **Stable Diffusion**
-
+  <!-- Star graph -->
   <img src="https://api.star-history.com/svg?repos=BrokenSource/DepthFlow&type=Timeline" width=500/>
 </div>
 
@@ -30,82 +31,31 @@
 
 As simple as that, we achieve a similar effect as [**Depthy**](https://depthy.stamina.pl)
 
-- 🤗 All of that with an WebUI powered by [**Gradio**](https://www.gradio.app/)
-
-**Currently,** we have:
-- 🎥 Interface for Image to Parallax Video
-- 🎵 Interface for AI Stereo Music using [**AudioCraft**](https://github.com/facebookresearch/audiocraft)
-
-<br/>
-
-**📈 Upcoming:**
-- **Feedback-loop** the parallax images to Stable Diffusion **img2img** after some initial **txt2img**
-- **Quick Visual Effects**: Vignette, particles, rotation on the base Shader
-
-This way we achieve a **text to video** effect where Stable Diffusion fills in the progressively unknown parts of the parallaxed image
-
-Some possibilities include:
-- Infinite side scrolling with the camera focusing on the background
-- Infinite rotation around any intermediate point on the image
-- Infinite rotation focusing on the closest image
-- Better zoom in, zoom out effects
-
-<br/>
-
-**🏆 Challenges:**
-- **GPU Computation time** will be a bottleneck for longer videos or many feedback loops per second
-  - _Possible solution_: Use fewer steps on img2img since it is already close to the target
-  - _Implementation_: Stop when `MSE(A, B)` is low enough
-- **Depth Estimation** is a hard problem, the output should be accurate enough
-- **The Shader** can't do magic, let's make it better
-
-<sub>Eventually I'd like the Shaders pipeline and imagery to be part of ShaderFlow project. The one here might not be the most flexible</sub>
-
-<br/>
-
-**👑 Future:**
-- **Keyframes:** Given a list of _keyframes_, interpolate prompts, depth maps, effects intensity
-- Maybe some form of API and **User Interface** to make it easier to use
-- **Music:** Generative music that maybe follows the video
-
-
 
 <br/>
 <br/>
 
-# Installation
+# 🔱 Installation
 
-## 🔮 Prebuilt Binaries
-We only release prebuilt binaries with PyTorch CUDA backend exclusive to NVIDIA GPUs, don't worry, if you are on macOS or have an AMD GPU please run directly from the source code, it works just as well
+## Dependencies
+- Setup our [**Framework**](https://github.com/BrokenSource/BrokenSource)
 
-**Instructions**:
+By default, Pytorch will be installed with CPU support, if you want to use your GPU:
 
-- Install [CUDA](https://developer.nvidia.com/cuda-downloads) and [cuDNN](https://developer.nvidia.com/cudnn) (Preferably from package manager in Linux)
+**NVIDIA** + CUDA:
+- Install<sup>1</sup> [CUDA](https://developer.nvidia.com/cuda-downloads) and [cuDNN](https://developer.nvidia.com/cudnn)
+- Run the command: `broken depthflow poe cuda`
 
-- Grab the latest [DepthFlow Release](https://github.com/BrokenSource/DepthFlow/releases/latest) for your platform, run it
+<sup><i>1: Preferably from package manager in Linux if so</i></sup>
 
+**AMD** + ROCm:
+- Run the command: `broken depthflow poe rocm`
 
+**CPU / macOS**:
+- Run the command: `broken depthflow poe cpu`
 
-### 📦 Package Manageer
-We are actively looking for package managers to bundle our projects, if you are interested in helping please contact us, you'll be credited here and do a great convenience service to the whole community
-
-<br/>
-
-## Running from the Source Code
-Follow instructions on our [Monorepo](https://github.com/BrokenSource/BrokenSource) for downloading our Framework, and chose PyTorch acceleration method below:
-
-
-### 🔦 Selecting PyTorch Acceleration Method
-PyTorch has three different packages: CPU mode only, CUDA with NVIDIA GPUs and ROCm for AMD GPUs
-
-Before running DepthFlow, select the PyTorch acceleration source package by modifying the `DepthFlow/pyproject.toml` file
-
-Beware dragons:
-- `CUDA`: Default installation, assumes you have a CUDA capable NVIDIA GPU and CUDA installed
-- `ROCm`: Work in progress from AMD, might be unstable, should work in general
-- `CPU`: Most compatible option, but slow for bigger inferences
-
-You can reinstall the Python virtual environment with `broken depthflow --reinstall` to apply the changes
+## Running the code
+- Run the command: `broken depthflow` or simply `depthflow` on the Broken Shell
 
 
 <br/>
@@ -121,18 +71,9 @@ The faster the hardware (CPU, GPU, RAM), the faster the code will run. Apart fro
 
 - **CPU:** Any should do, affects video encoding time
 - **GPU:** Supports OpenGL 3.3 or higher<sup>1</sup>, affects rendering time (sent to the CPU)
-  - Parallax mode: Very few VRAM for both NVIDIA and AMD
-  - Stable Diffusion:
-    - *Extra Large*: Minimum 8 GB VRAM for NVIDIA<sup>2</sup>, 16 GB for AMD<sup>3</sup>
-    - *Previous*: Minimum 6 GB VRAM for NVIDIA<sup>2</sup>, 8 GB for AMD<sup>3</sup>
-  - AudioCraft:
-    - Runnable on 4 GB for NVIDIA small model context length 5, (hangs on AMD?)
-    - Likely minimum 8 GB for NVIDIA medium size, ideally 12 GB or 16 GB
 - **OS:** Windows (10+), Linux, macOS - 64 bits
 - **Disk:** Roughly 30 GB free space (models and dependencies are big)
 - **RAM:** Minimum 12 GB, 16 GB Recommended, should be doable in 8 GB
-
-The main bottleneck 99% the time is the GPU for generative images and the parallax shader projections
 
 
 <sub>*1: Some NVIDIA datacenter GPUs does not implement common graphics APIs, for example A100, H100</sub>
@@ -140,7 +81,6 @@ The main bottleneck 99% the time is the GPU for generative images and the parall
 <sub>*3: Your GPU must support the PyTorch's CUDA installation version, pretty much all >= GTX 900 </sub>
 
 <sub>*2: Check for compatibility with your GPU, generally speaking anything <= Polaris (<= RX 500 series) is not supported</sub>
-
 
 
 <br/>
@@ -155,7 +95,7 @@ The main bottleneck 99% the time is the GPU for generative images and the parall
 While we won't enforce punishments for failed attributions, we would appreciate if you could credit us
 
 ## 🎩 Professional use
-Want to use this for your company or comercially?
+Want to use this for your company or commercially?
 
 - Let's do something great together, contact us at [Broken Source Software](https://github.com/BrokenSource)
 

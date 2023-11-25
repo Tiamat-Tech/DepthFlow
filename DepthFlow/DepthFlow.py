@@ -56,7 +56,7 @@ class DepthFlowMDE:
         """Monocular Depth Map Estimation"""
 
         # Load the image
-        image = BrokenSmart.load_image(image)
+        image = BrokenUtils.load_image(image)
 
         # Calculate hash of the image for caching
         image_hash = hashlib.md5(image.tobytes()).hexdigest()
@@ -66,7 +66,7 @@ class DepthFlowMDE:
         # If the depth map is cached, return it
         if cache and cache_path.exists():
             log.success(f"Depth map already cached on [{cache_path}]")
-            return BrokenSmart.load_image(cache_path).convert("L")
+            return BrokenUtils.load_image(cache_path).convert("L")
 
         # Load base image, estimate the depth map, save to cache
         self.__load_depth_model()
@@ -216,7 +216,7 @@ class DepthFlowGL:
     ) -> None:
 
         # Load image and its depth map
-        image = BrokenSmart.load_image(image).convert("RGB")
+        image = BrokenUtils.load_image(image).convert("RGB")
         depth = depth or self.mde.depth_map(image)
 
         # Upload textures to the GPU

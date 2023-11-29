@@ -37,50 +37,48 @@ As simple as that, we achieve a similar effect as [**Depthy**](https://depthy.st
 
 # 🔱 Installation
 
-## Dependencies
-- Setup our [**Framework**](https://github.com/BrokenSource/BrokenSource)
+> Download and install our [**Framework**](https://github.com/BrokenSource/BrokenSource) with all the code and projects first
 
-By default, Pytorch will be installed with CPU support, if you want to use your GPU:
-
-**NVIDIA** + CUDA:
-- Install<sup>1</sup> [CUDA](https://developer.nvidia.com/cuda-downloads) and [cuDNN](https://developer.nvidia.com/cudnn)
-- Run the command: `broken depthflow poe cuda`
-
-<sup><i>1: Preferably from package manager in Linux if so</i></sup>
-
-**AMD** + ROCm:
-- Run the command: `broken depthflow poe rocm`
-
-**CPU / macOS**:
-- Run the command: `broken depthflow poe cpu`
 
 ## Running the code
+
 - Run the command: `broken depthflow` or simply `depthflow` on the Broken Shell
 
+A **Gradio** interface should open, the first execution will download some models, be patient
+
+
+## Using your GPU
+
+> By default, Pytorch will be installed with CPU support.
+
+If you want to **Speed Up** the **Depth Estimation** process, you can install it with GPU support:
 
 <br/>
+
+**NVIDIA**<sup>N1</sup> (CUDA):
+- Install [CUDA](https://developer.nvidia.com/cuda-downloads) and [cuDNN](https://developer.nvidia.com/cudnn)
+- Run the command: `broken depthflow poe cuda`
+
+<sub>*N1: Preferably from package manager in Linux if so</sub>
+
+<sub>*N1: Your GPU must support the PyTorch's CUDA installation version, pretty much all >= GTX 900</sub>
+
+
 <br/>
 
-# 🚧 Hardware Requirements
-<div align="center">
-  Dear user with weak specs, you can only do so much on a limited hardware
-</div>
+**AMD**<sup>R1</sup> (ROCm):
+- Run the command: `broken depthflow poe rocm`
+
+<sub>*R1: Preferably from package manager in Linux if so</sub>
+
+<sub>*R1: Check for compatibility with your GPU, generally speaking anything <= Polaris (<= RX 500 series) is not supported</sub>
+
 
 <br/>
-The faster the hardware (CPU, GPU, RAM), the faster the code will run. Apart from memory restrictions your hardware should support some minimum technologies:
 
-- **CPU:** Any should do, affects video encoding time
-- **GPU:** Supports OpenGL 3.3 or higher<sup>1</sup>, affects rendering time (sent to the CPU)
-- **OS:** Windows (10+), Linux, macOS - 64 bits
-- **Disk:** Roughly 30 GB free space (models and dependencies are big)
-- **RAM:** Minimum 12 GB, 16 GB Recommended, should be doable in 8 GB
+**CPU / macOS** (Default):
 
-
-<sub>*1: Some NVIDIA datacenter GPUs does not implement common graphics APIs, for example A100, H100</sub>
-
-<sub>*3: Your GPU must support the PyTorch's CUDA installation version, pretty much all >= GTX 900 </sub>
-
-<sub>*2: Check for compatibility with your GPU, generally speaking anything <= Polaris (<= RX 500 series) is not supported</sub>
+- Run the command: `broken depthflow poe cpu`
 
 
 <br/>

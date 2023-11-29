@@ -109,7 +109,8 @@ class DepthFlowGradio:
         timeline.add_keyframe(CircleCamera() @ 0.0)
 
         # Random video output name
-        video_output = DEPTHFLOW_DIRECTORIES.TEMP/f"{uuid.uuid4()}.mp4"
+        date = arrow.now().format("YYYY-MM-DD_HH-mm-ss")
+        video_output = DEPTHFLOW_DIRECTORIES.DATA/f"{date}.mp4"
 
         # Open FFmpeg rendering to video
         ffmpeg = shell(
@@ -145,12 +146,6 @@ class DepthFlowGradio:
         # Wait video encoding to finish
         ffmpeg.stdin.close()
         ffmpeg.wait()
-
-        # Delete temporary video after 1 minute
-        def deletes_video(video_output):
-            time.sleep(60)
-            video_output.unlink()
-        BrokenUtils.better_thread(deletes_video, video_output, start=True)
 
         return str(video_output)
 

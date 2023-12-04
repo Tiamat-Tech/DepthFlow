@@ -3,19 +3,24 @@
 <div align="justify">
 
 <div align="center">
-  <!-- Logo -->
-  <img src="https://github.com/BrokenSource/DepthFlow/assets/29046864/9ea5fbd4-4f3e-4742-9a36-d6b8b6f02b65" width="160">
+  <img src="./DepthFlow/Resources/DepthFlow.png" width="200">
 
   <h1>DepthFlow</h1>
 
-  <!-- Visitor count -->
+  <img src="https://img.shields.io/github/stars/BrokenSource/DepthFlow" alt="Stars Badge"/>
   <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fhits.dwyl.com%2FBrokenSource%2FDepthFlow.json%3Fshow%3Dunique&label=Visitors&color=blue"/>
   <img src="https://img.shields.io/endpoint?url=https%3A%2F%2Fhits.dwyl.com%2FBrokenSource%2FDepthFlow.json&label=Page%20Views&color=blue"/>
+  <img src="https://img.shields.io/github/license/BrokenSource/DepthFlow?color=blue" alt="License Badge"/>
+  <a href="https://t.me/brokensource">
+    <img src="https://img.shields.io/badge/Telegram-Channel-blue?logo=telegram" alt="Telegram Channel Badge"/>
+  </a>
 
-  Image → **2.5D Parallax** Effect Video
 
-  <!-- Star graph -->
-  <img src="https://api.star-history.com/svg?repos=BrokenSource/DepthFlow&type=Timeline" width=500/>
+  <sub> 👆 Out of the many **Travellers**, you can be among the **Shining** stars who support us! ⭐️ </sub>
+
+  <br>
+
+  <ins> Image → **2.5D Parallax** Effect Video. A Professional [**Depthy**](https://depthy.stamina.pl) Alternative </ins>
 </div>
 
 
@@ -35,10 +40,13 @@ As simple as that, we achieve a similar effect as [**Depthy**](https://depthy.st
 <br/>
 <br/>
 
-# 🔱 Installation
+# 📦 Installation
 
-> Download and install our [**Framework**](https://github.com/BrokenSource/BrokenSource) with all the code and projects first
-
+> 🔴🟡🟢
+>
+> **Download** and install our [**Framework**](https://github.com/BrokenSource/BrokenSource) with all the code and projects first
+>
+> <sub><b>Note:</b> You cannot run this project without the <i>Framework</i></sub>
 
 ## Running the code
 

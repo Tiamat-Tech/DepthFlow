@@ -15,12 +15,11 @@
     <img src="https://img.shields.io/badge/Telegram-Channel-blue?logo=telegram" alt="Telegram Channel Badge"/>
   </a>
 
-
-  <sub> 👆 Out of the many **Travellers**, you can be among the **Shining** stars who support us! ⭐️ </sub>
+  <sub> 👆 Out of the many **Explorers**, you can be among the **Shining** stars who support us! ⭐️ </sub>
 
   <br>
 
-  <ins> Image → **2.5D Parallax** Effect Video. A Professional [**Depthy**](https://depthy.stamina.pl) Alternative </ins>
+  <ins> Image → **2.5D Parallax** Effect Video. A Professional **[**[**Depthy**](https://depthy.stamina.pl)**]** Alternative. That's **[**[**DepthFlow**](https://github.com/BrokenSource/DepthFlow)**]**.</ins>
 </div>
 
 
@@ -67,9 +66,7 @@ If you want to **Speed Up** the **Depth Estimation** process, you can install it
 - Install [CUDA](https://developer.nvidia.com/cuda-downloads) and [cuDNN](https://developer.nvidia.com/cudnn)
 - Run the command: `broken depthflow poe cuda`
 
-<sub>*N1: Preferably from package manager in Linux if so</sub>
-
-<sub>*N1: Your GPU must support the PyTorch's CUDA installation version, pretty much all >= GTX 900</sub>
+<sub>*N1: Your GPU must support the PyTorch's CUDA installation version, pretty much all >= GTX 900. Preferable install from your package manager in Linux if so</sub>
 
 
 <br/>
@@ -77,9 +74,7 @@ If you want to **Speed Up** the **Depth Estimation** process, you can install it
 **AMD**<sup>R1</sup> (ROCm):
 - Run the command: `broken depthflow poe rocm`
 
-<sub>*R1: Preferably from package manager in Linux if so</sub>
-
-<sub>*R1: Check for compatibility with your GPU, generally speaking anything <= Polaris (<= RX 500 series) is not supported</sub>
+<sub>*R1: Check for compatibility with your GPU, generally speaking anything <= Polaris (<= RX 500 series) is not supported. Preferably install from your package manager in Linux if so</sub>
 
 
 <br/>

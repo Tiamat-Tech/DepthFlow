@@ -1,4 +1,6 @@
 import DepthFlow.Resources as DepthFlowResources
+import torch
+import transformers
 from ShaderFlow import *
 
 from Broken import *

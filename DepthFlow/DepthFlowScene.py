@@ -17,15 +17,16 @@ class DepthFlowScene(SombreroScene):
     def settings(self, image):
         self.parallax(image)
 
+    def update(self):
+        # Load some image if none provided
+        if self.image.is_empty:
+            self.parallax("https://w.wallhaven.cc/full/28/wallhaven-286pxm.jpg")
+
     def setup(self):
 
         # Create textures
         self.image = self.engine.new_texture("image")
         self.depth = self.engine.new_texture("depth")
-
-        # Load some image if none provided
-        if self.image.is_empty:
-            self.parallax("https://w.wallhaven.cc/full/28/wallhaven-286pxm.jpg")
 
         # Create a Camera Shake Noise module
         self.shake_noise = self.engine.add(SombreroNoise(

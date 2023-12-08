@@ -19,7 +19,7 @@
 
   <br>
 
-  <ins> Image → **2.5D Parallax** Effect Video. A Professional **[**[**Depthy**](https://depthy.stamina.pl)**]** Alternative. That's **[**[**DepthFlow**](https://github.com/BrokenSource/DepthFlow)**]**.</ins>
+  <ins> **[**[**DepthFlow**](https://github.com/BrokenSource/DepthFlow)**]**: Image → **2.5D Parallax** Effect Video. A Professional **[**[**Depthy**](https://depthy.stamina.pl)**]** Alternative. </ins>
 </div>
 
 
@@ -43,16 +43,27 @@ As simple as that, we achieve a similar effect as [**Depthy**](https://depthy.st
 
 > 🔴🟡🟢
 >
-> **Download** and install our [**Framework**](https://github.com/BrokenSource/BrokenSource) with all the code and projects first
+> **Download** and install our [**Monorepo**](https://github.com/BrokenSource/BrokenSource) with all the code and projects first
 >
-> <sub><b>Note:</b> You cannot run this project without the <i>Framework</i></sub>
+> <sub><b>Note:</b> You cannot run this project in dev mode without the <i>Framework!</i></sub>
 
 ## Running the code
 
 - Run the command: `broken depthflow` or simply `depthflow` on the Broken Shell
 
-A **Gradio** interface should open, the first execution will download some models, be patient
+A real time window should pop up. You can see `depthflow --help` for render options
 
+#### Selecting the image
+- `depthflow settings (url | path) main`
+
+#### Rendering to a video
+- `depthflow (--render | -r)`
+- `depthflow -r -w 1280 -h 720 -f 30`
+- `depthflow settings (url | path) main --render -s 2`
+
+<b>Note</b>: A high SSAA `-s 2` is recommended for antialiasing
+
+<sup><b>Todo:</b> Reimplement the Gradio interface; configurable parallax settings</sup>
 
 ## Using your GPU
 

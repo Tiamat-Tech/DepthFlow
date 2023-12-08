@@ -9,6 +9,8 @@ class DepthFlowScene(SombreroScene):
     # DepthFlow objects
     mde = attrs.field(factory=DepthFlowMDE)
 
+    # # Image parallax
+
     def parallax(self, image: Option[PilImage, Path, "url"]):
         """Parallax effect"""
         self.image.from_image(image)
@@ -17,10 +19,7 @@ class DepthFlowScene(SombreroScene):
     def settings(self, image):
         self.parallax(image)
 
-    def update(self):
-        # Load some image if none provided
-        if self.image.is_empty:
-            self.parallax("https://w.wallhaven.cc/full/28/wallhaven-286pxm.jpg")
+    # # SombreroScene
 
     def setup(self):
 
@@ -57,6 +56,13 @@ class DepthFlowScene(SombreroScene):
 
         # Load DepthFlow shader
         self.engine.shader.fragment = (DEPTHFLOW.RESOURCES.SHADERS/"DepthFlow.frag").read_text()
+
+
+    def update(self):
+
+        # Load default image if none was provided
+        if self.image.is_empty:
+            self.parallax("https://w.wallhaven.cc/full/28/wallhaven-286pxm.jpg")
 
     def pipeline(self) -> Iterable[ShaderVariable]:
         yield ShaderVariable(qualifier="uniform", type="float", name=f"iFocus",          value=1),

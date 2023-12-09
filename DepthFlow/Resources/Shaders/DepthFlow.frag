@@ -20,15 +20,7 @@ vec2 displacement(vec2 stuv, sampler2D depth) {
 // - The idea of how this shader works is that we search, on the opposite direction a pixel is
 //   supposed to "walk", if some other pixel should be in front of *us* or not.
 //
-// - B's texture is A's on the future, so the parallax direction must be the inverse (send -1)
-//
 vec4 image_parallax(vec2 stuv, sampler2D image, sampler2D depth) {
-
-    // vec2 resolution = textureSize(image, 0);
-    // vec2 scale = vec2(resolution.y / resolution.x, 1.0);
-    // vec2 gluv = stuv2gluv(stuv);
-    // gluv *= scale;
-    // stuv = gluv2stuv(gluv);
 
     // The direction the pixel walk is the camera displacement itself
     vec2 direction = iPosition * iParallaxFactor;
@@ -36,12 +28,22 @@ vec4 image_parallax(vec2 stuv, sampler2D image, sampler2D depth) {
     // Initialize the parallax space with the original stuv
     vec2 parallax_uv = stuv + displacement(stuv, depth);
 
-    // FIXME: Do you know how to code shaders better than me?
-    // Fixme: Could you implement the step() pixel size anti-aliasing and better efficiency?
-    for (float i=0; i<length(direction); i=i+0.001) {
+    // The quality of the parallax effect is how tiny the steps are
+    float quality;
+    switch (iQuality) {
+        case 0: quality = 0.01;     break;
+        case 1: quality = 0.005;    break;
+        case 2: quality = 0.001;   break;
+        case 3: quality = 0.0008;  break;
+        case 4: quality = 0.0005; break;
+    }
+
+    // FIXME: Do you know how to code shaders better than me? Can this be more efficient?
+    for (float i=0; i<length(direction); i=i+quality) {
         vec2 walk_stuv          = stuv + direction*i;
         vec2 other_displacement = displacement(walk_stuv, depth);
 
+        // This pixel is on top of us, update the parallax stuv
         if (i < length(other_displacement)) {
             parallax_uv = walk_stuv;
         }

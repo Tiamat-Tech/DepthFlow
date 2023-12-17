@@ -14,6 +14,9 @@
   <a href="https://t.me/brokensource">
     <img src="https://img.shields.io/badge/Telegram-Channel-blue?logo=telegram" alt="Telegram Channel Badge"/>
   </a>
+  <a href="https://discord.gg/KjqvcYwRHm">
+    <img src="https://img.shields.io/discord/1184696441298485370?label=Discord&color=blue" alt="Discord Badge"/>
+  </a>
 
   <sub> 👆 Out of the many **Explorers**, you can be among the **Shining** stars who support us! ⭐️ </sub>
 
@@ -100,15 +103,6 @@ If you want to **Speed Up** the **Depth Estimation** process, you can install it
 
 # ⚖️ License
 
-## 👤 Personal use
-- **User Generated Content**: CC-BY 4.0 License
-- **Code**: AGPLv3-Only License
-
-While we won't enforce punishments for failed attributions, we would appreciate if you could credit us
-
-## 🎩 Professional use
-Want to use this for your company or commercially?
-
-- Let's do something great together, contact us at [Broken Source Software](https://github.com/BrokenSource)
+**See [BrokenSource](https://github.com/BrokenSource/BrokenSource) Repository** for the License of the Code Assets, Projects and User Generated Content.
 
 </div>

@@ -10,6 +10,12 @@ class DepthFlowMDE:
         """Whether CUDA is available"""
         return torch.cuda.is_available()
 
+    def load_model(self) -> None:
+        """Load the model"""
+        if self.model is None:
+            self.model = torch.hub.load("isl-org/ZoeDepth", "ZoeD_N", pretrained=True)
+            self.model.to("cuda" if self.cuda else "cpu")
+
     def __call__(self,
         image: Union[PilImage, PathLike, URL],
         normalized: bool=True,
@@ -46,11 +52,7 @@ class DepthFlowMDE:
         # -----------------------------------------------------------------------------------------|
         # Estimating
 
-        # Load the torch module
-        if self.model is None:
-            with halo.Halo(text="Loading Monocular Depth Estimation model"):
-                self.model = torch.hub.load("isl-org/ZoeDepth", "ZoeD_N", pretrained=True)
-                self.model.to("cuda" if self.cuda else "cpu")
+        self.load_model()
 
         # Estimate Depth Map
         with halo.Halo(text=f"Estimating Depth Map for the input image (CUDA: {self.cuda})"):

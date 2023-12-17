@@ -1,61 +1,87 @@
 
-// ------------------------------------------------------------------------------------------------|
+void main() {
+    SombreroCamera iCamera = iInitSombreroCamera(gluv);
 
-// Get the clamped depth of a image (no overshooting) based on iFocus
-// - Zero depth means the object does not move
-float get_depth(vec2 stuv, sampler2D depth) {
-    return iFocus - draw_image(depth, stuv).r;
-}
+    // Depth map maximum height
+    float height = 0.16;
 
-// Depth-Layer displacement for a pixel, composed of the camera displacement times max
-// camera displacement (iParallaxFactor) times the depth of the pixel (zero should not move)
-vec2 displacement(vec2 stuv, sampler2D depth) {
-    return iPosition * get_depth(stuv, depth) * iParallaxFactor;
-}
+    // Small shake
+    iCamera.position.yz += 0.1 * vec2(sin(iTime), sin(2*iTime));
 
-// ------------------------------------------------------------------------------------------------|
+    // Varying camera isometric
+    float iso = smoothstep(0.0, 1.0, (sin(iTime) + 1)/2);
+    iCamera.isometric = iso;
 
-// Apply the DepthFlow parallax effect into some image and its depth map
-//
-// - The idea of how this shader works is that we search, on the opposite direction a pixel is
-//   supposed to "walk", if some other pixel should be in front of *us* or not.
-//
-vec4 image_parallax(vec2 stuv, sampler2D image, sampler2D depth) {
+    // Project camera Rays
+    iCamera = iProjectSombreroCamera(iCamera);
 
-    // The direction the pixel walk is the camera displacement itself
-    vec2 direction = iPosition * iParallaxFactor;
+    // Doesn't intersect with the YZ plane
+    if (iCamera.out_of_bounds) {
+        fragColor.rgb = vec3(0.2);
+        return;
+    }
 
-    // Initialize the parallax space with the original stuv
-    vec2 parallax_uv = stuv + displacement(stuv, depth);
+    // Zoom out
+    iCamera.uv *= 0.6 + 0.25*(2.0/PI)*atan(2*iTime);
+
+    // Fix camera Zoom due isometric
+    iCamera.uv *= 1 - height*iso;
+
+    // // DepthFlow math
+
+    // Point where the ray intersects with the YZ plane
+    vec2 lambda = iCamera.uv;
+
+    // Note: No camera displacement mode, raw parallax
+    if (true) {
+        lambda -= vec2(-iCamera.position.y, iCamera.position.z);
+    }
+
+    // The vector from Lambda to the camera's projection on the YZ plane
+    vec2 displacement = vec2(-iCamera.origin.y, iCamera.origin.z) - lambda;
+
+    // Angle between the Ray's origin and the YZ plane
+    float theta = atan(
+        length(displacement),
+        abs(1 - iCameraPosition.x)
+    );
+
+    // The distance Beta we care for the depth map
+    float delta = abs(tan(theta) * (1 - iCamera.origin.x - height));
+    float alpha = abs(tan(theta) * (1 - iCamera.origin.x));
+    float beta  = abs(alpha - delta);
+
+    // The vector we should walk towards
+    vec2 walk = normalize(displacement);
+
+    // Start the parallax on the point itself
+    vec2 parallax = lambda;
 
     // The quality of the parallax effect is how tiny the steps are
     float quality;
     switch (iQuality) {
-        case 0: quality = 0.01;     break;
-        case 1: quality = 0.005;    break;
-        case 2: quality = 0.001;   break;
-        case 3: quality = 0.0008;  break;
-        case 4: quality = 0.0005; break;
+        case 0: quality = 0.01;  break;
+        case 1: quality = 0.01;  break;
+        case 2: quality = 0.005; break;
+        case 3: quality = 0.002; break;
+        case 4: quality = 0.001; break;
     }
 
-    // FIXME: Do you know how to code shaders better than me? Can this be more efficient?
-    for (float i=0; i<length(direction); i=i+quality) {
-        vec2 walk_stuv          = stuv + direction*i;
-        vec2 other_displacement = displacement(walk_stuv, depth);
+    // Fixme: Can we smartly cache the last walk distance?
+    // The Very Expensive Loop™
+    for (float i=0.0; i<1.0; i+=quality) {
+        vec2 sample = gluv2stuv(lambda + i*beta*walk);
 
-        // This pixel is on top of us, update the parallax stuv
-        if (i < length(other_displacement)) {
-            parallax_uv = walk_stuv;
+        // The depth map value
+        float depth_height = height * (1.0 - draw_image(depth, sample).r);
+        float walk_height  = (i*beta) / tan(theta);
+
+        if (depth_height > walk_height) {
+            parallax = sample;
         }
     }
 
-    // Sample the texture on the parallax space
-    return draw_image(image, parallax_uv);
+    // Draw the parallax image
+    fragColor = draw_image(image, parallax);
 }
 
-// ------------------------------------------------------------------------------------------------|
-
-void main() {
-    vec2 uv = zoom(stuv, 0.95 + 0.05*iZoom, vec2(0.5));
-    fragColor = image_parallax(uv, image, depth);
-}

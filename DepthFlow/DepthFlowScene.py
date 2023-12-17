@@ -15,9 +15,19 @@ class DepthFlowScene(SombreroScene):
         """Parallax effect"""
         self.image.from_image(image)
         self.depth.from_image(self.mde(image))
+        self.context.time = 0
 
-    def settings(self, image):
+    def resize_to_image(self):
+        self.context.resize(*self.image.size)
+
+    def settings(self, image: str):
         self.parallax(image)
+
+    def handle(self, message: SombreroMessage):
+
+        # Drag and drop images or urls to parallax
+        if isinstance(message, SombreroMessage.Window.FileDrop):
+            self.parallax(message.files[0])
 
     # # SombreroScene
 
@@ -26,6 +36,11 @@ class DepthFlowScene(SombreroScene):
         # Create textures
         self.image = self.engine.new_texture("image")
         self.depth = self.engine.new_texture("depth")
+        self.engine.new_texture("self").from_module(self.engine)
+
+        # Don't repeat textures
+        self.image.repeat(False)
+        self.depth.repeat(False)
 
         # Create a Camera Shake Noise module
         self.shake_noise = self.engine.add(SombreroNoise(
@@ -54,16 +69,15 @@ class DepthFlowScene(SombreroScene):
             dimensions=1
         ))
 
-        # Load DepthFlow shader
+        # Load the Default DepthFlow shader
         self.engine.shader.fragment = (DEPTHFLOW.RESOURCES.SHADERS/"DepthFlow.frag").read_text()
-
 
     def update(self):
 
         # Load default image if none was provided
         if self.image.is_empty:
-            self.parallax("https://w.wallhaven.cc/full/28/wallhaven-286pxm.jpg")
+            self.parallax("https://w.wallhaven.cc/full/pk/wallhaven-pkz5r9.png")
 
     def pipeline(self) -> Iterable[ShaderVariable]:
-        yield ShaderVariable(qualifier="uniform", type="float", name=f"iFocus",          value=1),
-        yield ShaderVariable(qualifier="uniform", type="float", name=f"iParallaxFactor", value=0.32),
+        yield ShaderVariable(qualifier="uniform", type="float", name=f"iFocus",          value=1)
+        yield ShaderVariable(qualifier="uniform", type="float", name=f"iParallaxFactor", value=0.52)

@@ -66,7 +66,7 @@ class DepthFlowMDE:
             depth_map = 255 * (depth_map - depth_map.min()) / factor
 
         # Convert array to PIL Image RGB24
-        depth_map = PIL.Image.fromarray(depth_map.astype("uint8"), "L")
+        depth_map = PIL.Image.fromarray(depth_map.astype(numpy.uint8))
 
         # -----------------------------------------------------------------------------------------|
         # Caching

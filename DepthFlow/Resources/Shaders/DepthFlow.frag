@@ -60,7 +60,7 @@ void main() {
     // The quality of the parallax effect is how tiny the steps are
     float quality;
     switch (iQuality) {
-        case 0: quality = 0.01;  break;
+        case 0: quality = 0.05;  break;
         case 1: quality = 0.01;  break;
         case 2: quality = 0.005; break;
         case 3: quality = 0.002; break;
@@ -68,6 +68,7 @@ void main() {
     }
 
     // Fixme: Can we smartly cache the last walk distance?
+    // Fixme: Calculate walk distance based on pixel and angle?
     // The Very Expensive Loop™
     for (float i=0.0; i<1.0; i+=quality) {
         vec2 sample = gluv2stuv(lambda + i*beta*walk);
